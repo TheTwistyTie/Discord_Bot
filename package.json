@@ -1,0 +1,23 @@
+{
+  "name": "discord_bot",
+  "version": "1.0.0",
+  "description": "Discord Bot for the Youth Action Hub Server.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheTwisyTie/discodBot.git"
+  },
+  "keywords": [
+    "discord",
+    "bot"
+  ],
+  "author": "Alexander Keith",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TheTwisyTie/discodBot/issues"
+  },
+  "homepage": "https://github.com/TheTwisyTie/discodBot#readme"
+}
