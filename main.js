@@ -10,7 +10,7 @@ const client = new Discord.Client(
         "GUILD_PRESENCES", 
         "GUILD_MESSAGES", 
         "GUILD_MESSAGE_REACTIONS", 
-        "DIRECT_MESSAGES"
+        "DIRECT_MESSAGES",
     ] , partials: ["MESSAGE", "CHANNEL", "REACTION"]
 });
 
@@ -50,13 +50,17 @@ client.on('messageCreate', message =>{
     } else if(command === 'embed'){
         client.commands.get('embed').execute(message, args, Discord);
     } else if(command === 'embedbuilder'){
-        client.commands.get('embedbuilder').execute(message, args, Discord, client);
+        client.commands.get('embedbuilder_v2').execute(message, args, Discord, client);
     } else if(command === 'shutdown'){
         if(message.member.roles.cache.has('787699492061052948'))
         {
             message.reply("Shutting Down...").then(() => {
-                console.log("Bot is Offline");
-                client.destroy();
+                setTimeout(() => {
+                    client.commands.get('clear').execute(message, ['2'], Discord).then(() => {
+                        console.log("Bot is Offline");
+                        client.destroy();
+                    })
+                }, 1500);
             })
         } else {
             return message.reply('Incorrect Permissions.');
