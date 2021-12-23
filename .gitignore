@@ -1198,3 +1198,7 @@ node_modules/ws/lib/validation.js
 node_modules/ws/lib/websocket-server.js
 node_modules/ws/lib/websocket.js
 Commands/embedbuilder.js
+.vscode/settings.json
+Commands/.DS_Store
+.DS_Store
+.gitignore
