@@ -7,11 +7,13 @@ module.exports = {
     async execute(message, args, Discord, client){
         //Enter Command Here
         if(message.member.roles.cache.has('787699492061052948')){
-            const prefix = "~";
+            //#region Inital Setup
+            const prefix = "$";
             const channel = message.channel;
 
             const guild = channel.guild;
-
+            //#endregion
+            
             //#region Webhook Setup
             const webhooks = await channel.fetchWebhooks();
             let webhook = webhooks.first();
@@ -57,7 +59,7 @@ module.exports = {
                 + `\t${prefix}color <text> | Lets you set the color of your embed.\n`
                 + `\t\tUsage: ${prefix}color #ab0b00\n`
                 + "```"
-                + "\t\* *This is using hex colors. Use this link for help:* https://bit.ly/32h1TT3\n"
+                + "\t\* *This is using hex colors. Use this link for help:* https://bit.ly/3FqFzVE\n"
                 + "```"
                 + `\t${prefix}add | Add various compenents to your embed. A sub-menu will open with component commands.\n`
                 + `\t\tUsage: ${prefix}add\n`
@@ -97,7 +99,7 @@ module.exports = {
                     //#region Base Commands
 
                     if(!m.content.startsWith(prefix) || m.author.bot) {
-                        thread.send(`Command not detected. Please start your command with \'~\'`)
+                        return thread.send(`Command not detected. Please start your command with \'${prefix}\'`)
                     }
 
                     const args = m.content.slice(prefix.length).split(/ +/);
@@ -115,8 +117,20 @@ module.exports = {
                             this.previewEmbed(embedInfo, thread, webhook);
                             break;
                         case "color":
-                            embedInfo.color = m.content.slice(prefix.length + command.length);
-                            
+                            let formatCheck = /^#[0-9A-F]{6}$/i;
+                            let colorText = m.content.slice(prefix.length + command.length + 1);
+                            if(!formatCheck.test(colorText)) {
+                                if(formatCheck.test(`#${colorText}`))
+                                {
+                                    colorText = `#${colorText}`;
+                                } else {
+                                    console.log(`${colorText} was entered instead of a hex color. Embed Builder`)
+                                    m.reply("This is not a hex color code. Format: \'#0f0f0f\'")
+                                    break;
+                                }
+                            }
+
+                            embedInfo.color = colorText;
                             this.previewEmbed(embedInfo, thread, webhook);
                             break;
                         case "add":
@@ -149,10 +163,26 @@ module.exports = {
 
                             break;
                         case "finish":
-                            message.channel.send({embeds: [this.buildEmbed(embedInfo, message, Discord)]});
+                            message.channel.messages.fetch({limit: 2}).then(messages =>{
+                                message.channel.bulkDelete(messages);
+                            });
+                            
+                            /*
+                            let sent = message.channel.send({embeds: [this.buildEmbed(embedInfo, message, Discord)]});
+                            if(typeof embedInfo.reactions !== 'undefined'){
+                                for(i = 0; i < embedInfo.reactions.length; i++)
+                                {
+                                    sent.react(embedInfo.reactions[i])
+                                }
+                            }
+                            */
+
                             collector.stop();
                             break;
                         case "cancel":
+                            message.channel.messages.fetch({limit: 2}).then(messages =>{
+                                message.channel.bulkDelete(messages);
+                            });
                             collector.stop();
                             break;
                         default:
@@ -170,7 +200,7 @@ module.exports = {
                     if (!waitingToFillField && !waitingToFillInlineField) {
                         //#region Add Component Commands
                         if(!m.content.startsWith(prefix) || m.author.bot){
-                            thread.send(`Command not detected. Please start your command with \'~\'`)
+                            return thread.send(`Command not detected. Please start your command with \'${prefix}\'`)
                         };
                     
                         const args = m.content.slice(prefix.length).split(/ +/);
@@ -211,6 +241,27 @@ module.exports = {
                                 embedInfo.image = this.mergeArgs(args);
                                 waitingForResponse = false;
                                 this.previewEmbed(embedInfo, thread, webhook);
+                                break;
+                            case 'reaction':
+                                let formatCheck = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/gi;
+                                let emoji = this.mergeArgs(args);
+                                if(!formatCheck.test(emoji)){
+                                    console.log(`${emoji} was entered as an emoji.`)
+                                    return thread.send('This is not an accepted emoji. Please try again.')
+                                } else {
+                                    console.log(`${emoji} was collected for an emoji.`)
+                                }
+
+                                reaction = [emoji];
+
+                                if(typeof embedInfo.reactions !== 'undefined'){
+                                    embedInfo.reactions.push(reaction[0]);
+                                } else {
+                                    embedInfo.reactions = reaction;
+                                }
+
+                                waitingForResponse = false;
+                                this.previewEmbed(embedInfo, thread, webhook)
                                 break;
                             default:
                                 thread.send("I dont know what youre trying to add.");
@@ -262,7 +313,7 @@ module.exports = {
         }
     },
 
-    previewEmbed(embedInfo, thread, webhook){
+    async previewEmbed(embedInfo, thread, webhook){
 
         let newEmbed = new MessageEmbed();
 
@@ -289,11 +340,22 @@ module.exports = {
             newEmbed.setImage(embedInfo.image);
         }
         
-        webhook.send({
+        let sent = await webhook.send({
             content: embedInfo.previewText, 
             embeds: [newEmbed],
             threadId: thread.id
         });
+
+        /*
+        if(typeof embedInfo.reactions !== 'undefined')
+        {
+            for(i = 0; i < embedInfo.reactions.length; i++)
+            {
+                console.log(`Trying to add ${embedInfo.reactions[i]} as a reaction.`)
+                await sent.react(`${embedInfo.reactions[i]}`)
+            }
+        }
+        */
     },
 
     buildEmbed(embedInfo){
