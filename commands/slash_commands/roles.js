@@ -30,17 +30,18 @@ module.exports = {
         
         if(!interaction) return;
 
-        await interaction.reply({
+        const msg = await interaction.reply({
             content: 'What type of roles would you like to set?',
             components: [row],
             ephemeral: true,
+            fetchReply: true,
         })
 
-        const btnCollector = channel.createMessageComponentCollector({
+        const btnCollector = msg.createMessageComponentCollector({
             max: 1,
         })
 
-        btnCollector.on('collect', btnInt => {
+        btnCollector.on('collect', async btnInt => {
             if(btnInt.customId === 'pronouns') {
                 const pgpMessageComponent = new MessageActionRow()
                     .addComponents(
@@ -70,17 +71,18 @@ module.exports = {
                     components: [],
                     ephemeral: true
                 })
-                btnInt.reply({
+                const btnMsg = await btnInt.reply({
                     content: "**What pronouns do you use??**",
                     components: [pgpMessageComponent],
                     ephemeral: true,
+                    fetchReply: true,
                 })
     
                 const filter = (btnInt) => {
                     return interaction.user.id === btnInt.user.id
                 }
     
-                const pgpCollector = channel.createMessageComponentCollector({
+                const pgpCollector = btnMsg.createMessageComponentCollector({
                     filter,
                     time: 30000
                 })
@@ -172,17 +174,18 @@ module.exports = {
                     components: [],
                     ephemeral: true
                 })
-                btnInt.reply({
+                const btnMsg = await btnInt.reply({
                     content : "**What region are you from?**",
                     components : [regionMessageComponent],
                     ephemeral: true,
+                    fetchReply: true,
                 })
     
                 const filter = (dropDownInt) => {
                     return interaction.user.id === dropDownInt.user.id
                 }
     
-                const regionCollector = channel.createMessageComponentCollector({
+                const regionCollector = btnMsg.createMessageComponentCollector({
                     filter,
                 })
     
