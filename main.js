@@ -40,11 +40,6 @@ for(const command of commandFiles) {
 const slash = []
 let slashFiles = fs.readdirSync('./commands/slash_commands').filter(file => file.endsWith('.js'));
 
-let resourceSubfolder = fs.readdirSync('./commands/slash_commands/resources').filter(file => file.endsWith('.js'))
-for(i = 0; i < resourceSubfolder.length; i++) {
-    slashFiles.push('resources/' + resourceSubfolder[i])
-}
-
 for(const file of slashFiles) {
     const filePath = `./commands/slash_commands/${file}`;
 
