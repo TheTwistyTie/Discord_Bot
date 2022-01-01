@@ -3,6 +3,10 @@ const { REST } = require('@discordjs/rest')
 const { Routes } = require('discord-api-types/v9')
 const Discord = require('discord.js')
 const fs = require('fs')
+const Database = require('./config/Database');
+const db = new Database();
+
+db.connect();
 
 const client = new Discord.Client({
     intents: [
@@ -34,10 +38,18 @@ for(const command of commandFiles) {
 }
 
 const slash = []
-const slashFiles = fs.readdirSync('./commands/slash_commands').filter(file => file.endsWith('.js'));
+let slashFiles = fs.readdirSync('./commands/slash_commands').filter(file => file.endsWith('.js'));
+
+let resourceSubfolder = fs.readdirSync('./commands/slash_commands/resources').filter(file => file.endsWith('.js'))
+for(i = 0; i < resourceSubfolder.length; i++) {
+    slashFiles.push('resources/' + resourceSubfolder[i])
+}
 
 for(const file of slashFiles) {
-    const command = require(`./commands/slash_commands/${file}`);
+    const filePath = `./commands/slash_commands/${file}`;
+
+    const command = require(filePath);
+
     slash.push(command.data.toJSON());
     client.slashCommands.set(command.data.name, command);
 }
