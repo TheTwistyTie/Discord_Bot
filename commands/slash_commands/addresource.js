@@ -1,6 +1,8 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const {MessageActionRow, MessageButton, MessageSelectMenu} = require("discord.js");
-const Resources = require('../../models/Resources')
+const Resources = require('../../models/Resources');
+const addNew = require('./resources/newResourceType');
+const createResource = require('./resources/createResource');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -10,6 +12,7 @@ module.exports = {
     async execute(interaction) {
         //Enter Command Here
         const { channel } = interaction
+        //console.log('runs');
 
         let resources;
         resources = await Resources.findOne({guild_id: channel.guild.id});
@@ -20,10 +23,10 @@ module.exports = {
                 guild_id: channel.guild.id,
                 types: [
                     {
-                        value: 'Housing',
+                        value: 'Housing Resource',
                     },
                     {
-                        value: 'Furniture',
+                        value: 'Furniture Resource',
                     },
                     {
                         value: 'Employment Opportunity',
@@ -32,10 +35,10 @@ module.exports = {
                         value: 'Finacial Help',
                     },
                     {
-                        value: 'Food',
+                        value: 'Food Resource',
                     },
                     {
-                        value: 'Clothes',
+                        value: 'Clothing Resource',
                     },
                     {
                         value: 'Showers',
@@ -50,16 +53,16 @@ module.exports = {
                         value: 'Identity Documents',
                     },
                     {
-                        value: 'Educational',
+                        value: 'Educational Resource',
                     },
                     {
-                        value: 'LGBTQ+',
+                        value: 'LGBTQ+ Resource',
                     },
                     {
                         value: 'Hotline',
                     },
                     {
-                        value: 'Covid-19',
+                        value: 'Covid-19 Resource',
                     },
                 ]
             })
@@ -67,22 +70,25 @@ module.exports = {
             resources.save(err => {
                 if(err) {
                     console.log(err);
-                    message.reply({
+                    interaction.reply({
                         content: 'An Issue has occured.',
                     }).then(() => {
-                        setTimeout(() => {
-                            client.commands.get('clear').execute(message, ['1'], Discord)
+                        setTimeout( async () => {
+                            await channel.messages.fetch({limit: '1'}).then(messages =>{
+                                channel.bulkDelete(messages);
+                            });
                         }, 2000);
                     });
                     return;
                 }
 
-                interaction.reply({
-                    content: `Added Rescource type.`,
-                    ephemeral: true
+                channel.send({
+                    content: `Added Rescource types.`,
                 }).then(() => {
-                    setTimeout(() => {
-                        client.commands.get('clear').execute(message, ['1'], Discord)
+                    setTimeout( async () => {
+                        await channel.messages.fetch({limit: '1'}).then(messages =>{
+                            channel.bulkDelete(messages);
+                        });
                     }, 2000);
                 });
             })
@@ -115,37 +121,41 @@ module.exports = {
                     .setPlaceholder("Select a type of resource.")
                     .setOptions(resourceType)
             )
-
-        await interaction.reply({
+        
+        const resourceMsg = await interaction.reply({
             content: "What kind of resource are you trying to add?",
             components: [row],
             ephemeral: true,
+            fetchReply: true,
         })
 
-        const filter = (dropDownInt) => {
-            return interaction.user.id === dropDownInt.user.id
+        const filter = (reactionInt) => {
+            return interaction.user.id === reactionInt.user.id
         }
     
-        const resourceTypeCollector = btnMsg.createMessageComponentCollector({
+        const resourceTypeCollector = resourceMsg.createMessageComponentCollector({
             filter,
             max: 1,
         })
 
         resourceTypeCollector.on('collect', async (btnInteraction) => {
-            const { customId, values, member } = dropDownInt
-            if(customId === 'add_new')
+            const { customId, values, member } = btnInteraction
+
+            const value = values[0]
+
+            if(value === 'add_new')
             {
-                await interaction.editRply({
-                    content: `What type of resource would you like to add?`,
-                    components: [],
-                    ephemeral: true,
+                interaction.editReply({
+                    content: "Adding new resource type.",
+                    components: []
                 })
+                addNew(btnInteraction, resources)
             } else {
-                await interaction.editRply({
-                    content: `What type of resource would you like to add?`,
-                    components: [],
-                    ephemeral: true,
+                interaction.editReply({
+                    content: `Adding ${value}`,
+                    components: []
                 })
+                createResource(value, btnInteraction, resources)
             }
         })
     }
