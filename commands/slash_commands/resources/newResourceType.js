@@ -1,11 +1,6 @@
-const addNew = async (interaction) => {
-    const intMsg = interaction.reply({
-        contents: 'What new category of resource would you like to add?'
-    })
+const Resources = require('../../../models/Resources');
+const {MessageActionRow, MessageButton} = require("discord.js");
 
-<<<<<<< Updated upstream
-    const {channel} = interaction;
-=======
 const addNew = async (interaction) => {
     const {channel} = interaction;
 
@@ -16,10 +11,9 @@ const addNew = async (interaction) => {
         content: 'What new category of resource would you like to add?',
         ephemeral: true,
     })
->>>>>>> Stashed changes
 
     const filter = (m) => {
-        return interaction.user.id === m.user.id
+        return interaction.user.id === m.author.id
     }
 
     const collector = channel.createMessageCollector({
@@ -27,12 +21,10 @@ const addNew = async (interaction) => {
         max: 1
     })
 
-    collector.on('collect', message => {
+    collector.on('collect', async message => {
         await message.channel.messages.fetch({limit: '1'}).then(messages =>{
             message.channel.bulkDelete(messages);
         });
-<<<<<<< Updated upstream
-=======
 
         resources.types.push({
             value: `${message.content}`
@@ -99,7 +91,6 @@ const addNew = async (interaction) => {
                 }
             })
         })
->>>>>>> Stashed changes
     })
 }
 
