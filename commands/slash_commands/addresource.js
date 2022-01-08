@@ -64,6 +64,7 @@ module.exports = {
                 ]
             })
 
+
             resources.save(err => {
                 if(err) {
                     console.log(err);
@@ -132,20 +133,36 @@ module.exports = {
         })
 
         resourceTypeCollector.on('collect', async (btnInteraction) => {
+<<<<<<< Updated upstream
             const { customId, values, member } = dropDownInt
             if(customId === 'add_new')
+=======
+            const { values } = btnInteraction
+
+            const value = values[0]
+
+            if(value === 'add_new')
+>>>>>>> Stashed changes
             {
                 await interaction.editRply({
                     content: `What type of resource would you like to add?`,
                     components: [],
                     ephemeral: true,
                 })
+<<<<<<< Updated upstream
+=======
+                addNew(btnInteraction)
+>>>>>>> Stashed changes
             } else {
                 await interaction.editRply({
                     content: `What type of resource would you like to add?`,
                     components: [],
                     ephemeral: true,
                 })
+<<<<<<< Updated upstream
+=======
+                createResource(value, btnInteraction)
+>>>>>>> Stashed changes
             }
         })
     }

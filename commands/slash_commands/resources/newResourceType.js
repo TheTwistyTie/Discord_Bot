@@ -3,7 +3,20 @@ const addNew = async (interaction) => {
         contents: 'What new category of resource would you like to add?'
     })
 
+<<<<<<< Updated upstream
     const {channel} = interaction;
+=======
+const addNew = async (interaction) => {
+    const {channel} = interaction;
+
+    let resources;
+    resources = await Resources.findOne({guild_id: channel.guild.id});
+    
+    await interaction.reply({
+        content: 'What new category of resource would you like to add?',
+        ephemeral: true,
+    })
+>>>>>>> Stashed changes
 
     const filter = (m) => {
         return interaction.user.id === m.user.id
@@ -18,6 +31,75 @@ const addNew = async (interaction) => {
         await message.channel.messages.fetch({limit: '1'}).then(messages =>{
             message.channel.bulkDelete(messages);
         });
+<<<<<<< Updated upstream
+=======
+
+        resources.types.push({
+            value: `${message.content}`
+        })
+
+        resources.save(async err => {
+            if(err) {
+                console.log(err);
+                message.reply({
+                    content: 'An Issue has occured.',
+                }).then(() => {
+                    setTimeout(async () => {
+                        await message.channel.messages.fetch({limit: '2'}).then(messages =>{
+                            message.channel.bulkDelete(messages);
+                        });
+                    }, 2000);
+                });
+                return;
+            }
+
+            const row = new MessageActionRow()
+                .addComponents(
+                    new MessageButton()
+                        .setCustomId('continue')
+                        .setLabel('Continue')
+                        .setStyle('SUCCESS'),
+                    new MessageButton()
+                        .setCustomId('cancel')
+                        .setLabel('Cancel')
+                        .setStyle('DANGER')
+                )
+
+            const btnMsg = await interaction.editReply({
+                content: `Added Rescource type: \'**${message.content}**\'`,
+                components: [row],
+                ephemeral: true,
+                fetchReply: true,
+            })
+
+            const btnFilter = (m) => {
+                return interaction.user.id === m.user.id
+            }
+
+            const confCollector = btnMsg.createMessageComponentCollector({
+                btnFilter,
+                max: 1
+            })
+
+            confCollector.on('collect', (btnInt) => {
+                if(btnInt.customId === 'continue') {
+                    interaction.editReply({
+                        content: 'Added New Resource Type.',
+                        components: [],
+                        ephemeral: true,
+                    })
+                    const createResource = require('./createResource');
+                    createResource(message.content, btnInt, resources)
+                } else {
+                    interaction.editReply({
+                        content: 'Canceled.',
+                        components: [],
+                        ephemeral: true,
+                    })
+                }
+            })
+        })
+>>>>>>> Stashed changes
     })
 }
 
