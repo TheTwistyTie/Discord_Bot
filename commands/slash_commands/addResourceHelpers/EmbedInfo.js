@@ -1,5 +1,5 @@
 const {MessageEmbed} = require("discord.js");
-const colorCheck = require('./colorCheck');
+const submitResource = require("./submitResource");
 
 class EmbedInfo {
     index (string) {
@@ -57,14 +57,67 @@ class EmbedInfo {
         }
     }
 
+    addEligibility (Eligibility) {
+        const result = this.index('Eligibility:')
+        if(result !== -1) {
+            this.#fieldsArray[result].value = Eligibility;
+        } else {
+            this.#fieldsArray.push({
+                name: 'Eligibility:',
+                value: Eligibility,
+                inline: true,
+            })
+        }
+    }
+
+    addOpenHours (Open) {
+        const result = this.index('Open:')
+        if(result !== -1) {
+            this.#fieldsArray[result].value = Open;
+        } else {
+            this.#fieldsArray.push({
+                name: 'Open:',
+                value: Open,
+                inline: true,
+            })
+        }
+    }
+
+    addLanguages (Languages) {
+        const result = this.index('Languages:')
+        if(result !== -1) {
+            this.#fieldsArray[result].value = Languages;
+        } else {
+            this.#fieldsArray.push({
+                name: 'Languages:',
+                value: Languages,
+                inline: true,
+            })
+        }
+    }
+
     submit (interaction) {
-        //submit to database
+        const embedData = {
+            resourceType: this.#title,
+            description: this.#description,
+            color: this.#color,
+            image: this.#image,
+            url: this.#url,
+            fields: this.#fieldsArray,
+            timestamp: new Date()
+        }
+
+        submitResource(embedData, this.buildEmbed(true), interaction)
     }
 
     constructor(resourceType, color)
     {
         this.#title = resourceType;
-        this.#color = color
+        if(!color) {
+            this.#color = '#ffffff'
+        } else {
+            this.#color = color
+        }
     }
 
     #color;
@@ -98,7 +151,7 @@ class EmbedInfo {
         return this.#fieldsArray[0].value
     }
 
-    buildEmbed() {
+    buildEmbed(final) {
         let newEmbed = new MessageEmbed()
         .setColor(this.#color)
         .setDescription(this.#description)
@@ -115,7 +168,12 @@ class EmbedInfo {
         }
 
         if(typeof this.image !== 'undefined'){
-            newEmbed.setImage(this.image);
+            newEmbed.setImage(this.#image);
+            newEmbed.setThumbnail(this.#image);
+        }
+
+        if(final){
+            newEmbed.setTimestamp()
         }
 
         return newEmbed

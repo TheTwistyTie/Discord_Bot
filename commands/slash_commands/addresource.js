@@ -1,8 +1,8 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const {MessageActionRow, MessageButton, MessageSelectMenu} = require("discord.js");
+const {MessageActionRow, MessageSelectMenu} = require("discord.js");
 const Resources = require('../../models/Resources');
-const addNew = require('./resources/newResourceType');
-const createResource = require('./resources/createResource');
+const addNew = require('./addResourceHelpers/newResourceType');
+const createResource = require('./addResourceHelpers/createResource');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -23,46 +23,64 @@ module.exports = {
                 types: [
                     {
                         value: 'Housing Resource',
+                        color: '#8fa1fc',
                     },
                     {
                         value: 'Furniture Resource',
+                        color: '#f6fbdc',
                     },
                     {
                         value: 'Employment Opportunity',
+                        color: '#4e784c',
                     },
                     {
                         value: 'Finacial Help',
+                        color: '#52ec53',
                     },
                     {
                         value: 'Food Resource',
+                        color: '#d35172',
                     },
                     {
                         value: 'Clothing Resource',
+                        color: '#96bd6a',
                     },
                     {
                         value: 'Showers',
+                        color: '#2fc4d6',
                     },
                     {
                         value: 'Childcare',
+                        color: '#238eb7',
                     },
                     {
                         value: 'Healthcare',
+                        color: '#990c2c',
                     },
                     {
                         value: 'Identity Documents',
+                        color: '#061451',
                     },
                     {
                         value: 'Educational Resource',
+                        color: '#b58938',
                     },
                     {
                         value: 'LGBTQ+ Resource',
+                        color: '#fa51b4',
                     },
                     {
                         value: 'Hotline',
+                        color: '#e9ff64',
                     },
                     {
                         value: 'Covid-19 Resource',
+                        color: '#f13422',
                     },
+                ],
+                languages: [
+                    'English',
+                    'Spanish',
                 ]
             })
 

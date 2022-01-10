@@ -1,10 +1,12 @@
 const {MessageActionRow, MessageButton} = require("discord.js");
 
-const addImage = async (interaction, embedInfo) => {
+const itemTitle = 'Phone Number:'
+
+const addPhoneNumber = async (interaction, embedInfo) => {
     const { channel } = interaction;
 
     const mainMsg = await interaction.reply({
-        content: 'What is the url of the image you want your resource to have?',
+        content: 'What is the phone number you want your resource to have?',
         ephemeral: true,
         fetchReply: true,
     })
@@ -13,15 +15,15 @@ const addImage = async (interaction, embedInfo) => {
         return m.author.id === interaction.user.id
     }
 
-    const urlCollector = channel.createMessageCollector({
+    const numberCollector = channel.createMessageCollector({
         filter,
         max: 1,
     })
 
-    urlCollector.on('collect', async urlMsg => {
-        let url = urlMsg.content;
+    numberCollector.on('collect', async numberMsg => {
+        let number = numberMsg.content;
 
-        await urlMsg.delete()
+        await numberMsg.delete()
 
         const row = new MessageActionRow()
             .addComponents(
@@ -39,20 +41,13 @@ const addImage = async (interaction, embedInfo) => {
             return interaction.user.id === m.user.id
         }
 
-        let isUrl = await validURL(url);
-        //let isUrl = true;
+        let isNumber = await validNumber(number);
+        //let isNumber = true;
 
-        if(!isUrl){
-            if(validURL('https://' + url)){
-                url = 'https://' + url
-                isUrl = true;
-            }
-        }
-
-        if(isUrl){       
+        if(isNumber){       
 
             const btnMsg = await interaction.editReply({
-                content: `Imgage URL: \'**${url}**\'`,
+                content: `${itemTitle} \'**${number}**\'`,
                 components: [row],
                 ephemeral: true,
                 fetchReply: true,
@@ -70,7 +65,7 @@ const addImage = async (interaction, embedInfo) => {
                         components: [],
                         ephemeral: true,
                     })
-                    embedInfo.setImage(url)
+                    embedInfo.addPhoneNumber(number)
                 } else {
                     interaction.editReply({
                         content: 'Canceled',
@@ -86,7 +81,7 @@ const addImage = async (interaction, embedInfo) => {
         } else {
 
             const errMsg = await interaction.editReply({
-                content: "\nThis is not a proper URL\tFormat: \'https://website.com/imgage.png\'\n*Please make sure that your URL ends with .png, .jpg, .jpeg, or .gif*\n\nWould you like to try again try again.",
+                content: "\nThis is not a proper phone number.\nFormats:\n\t(123) 456-7890\n\t(123)456-7890\n\t123-456-7890\n\t123.456.7890\n\nWould you like to try again try again.",
                 components: [row],
                 ephemeral: true,
                 fetchReply: true,
@@ -103,15 +98,16 @@ const addImage = async (interaction, embedInfo) => {
                         content: 'Confimed',
                         components: []
                     })
-                    addImage(btnInt, embedInfo)
+                    addPhoneNumber(btnInt, embedInfo)
                 } else {
                     interaction.editReply({
                         content: 'Canceled',
                         components: []
                     })
                 }
+
                 const createResource = require("./createResource");
-                createResource(embedInfo.resourceType, btnInt, embedInfo);                
+                createResource(embedInfo.resourceType, btnInt, embedInfo);
             })
 
         }
@@ -119,23 +115,9 @@ const addImage = async (interaction, embedInfo) => {
     })
 }
 
-const validURL = (string) => {
-    const imageEndings = [
-        'png', 'jpg', 'jpeg', 'gif' 
-    ]
-
-    let res = false;
-
-    if(string.startsWith('https://')) {
-        if(imageEndings.some((ending) => {
-            return string.endsWith(ending);
-        })) {
-            const tester = (/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
-            res = tester.test(string);
-        }
-    }
-
-    return res
+const validNumber = (string) => {
+    const tester = (/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im);
+    return tester.test(string);
 }
 
-module.exports = addImage;
+module.exports = addPhoneNumber;

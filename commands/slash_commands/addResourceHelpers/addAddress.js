@@ -1,5 +1,4 @@
 const {MessageActionRow, MessageButton} = require("discord.js");
-const addImage = require("./addImage");
 
 const itemTitle = 'Address:'
 
@@ -7,7 +6,7 @@ const addAddress = async (interaction, embedInfo) => {
     const { channel } = interaction;
 
     const mainMsg = await interaction.reply({
-        content: 'What is the address you want your resource to have?',
+        content: 'What is the address you want your resource to have?\n\t*Press (Shift + Enter) for a new line.\n\tPress (Enter) to submit.*',
         ephemeral: true,
         fetchReply: true,
     })

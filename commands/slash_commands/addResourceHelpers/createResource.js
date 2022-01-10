@@ -8,6 +8,9 @@ const addPhoneNumber = require("./addPhoneNumber");
 const addEmail = require("./addEmail");
 const addAddress = require("./addAddress");
 const colorCheck = require('./colorCheck');
+const addEligibility = require("./addEligibility");
+const addOpenHours = require("./addOpenHours");
+const addLanguages = require("./addLanguages");
 
 let preview;
 let btnCollector;
@@ -90,6 +93,18 @@ const createResource = async (resourceType, interaction, oldEmbedInfo) => {
                 case 'add_address':
                     contentText = 'Adding an address...'
                     addAddress(btnInt, embedInfo);
+                    break;
+                case 'add_eligibility':
+                    contextText = 'Adding resource eligibilty...'
+                    addEligibility(btnInt, embedInfo);
+                    break;
+                case 'add_open_hours':
+                    contextText = 'Adding Open Hours...'
+                    addOpenHours(btnInt, embedInfo)
+                    break;
+                case 'add_languages':
+                    contextText = 'Adding Languages...'
+                    addLanguages(btnInt, embedInfo)
                     break;
             }
             interaction.editReply({
@@ -212,6 +227,52 @@ const makeMessage = (embedInfo) => {
             addressButton,
         )
 
+    let eligibilityButton;
+    if(embedInfo.index('Eligibility:') === -1) {
+        eligibilityButton = new MessageButton()
+            .setLabel('Add eligibility.')
+            .setCustomId('add_eligibility')
+            .setStyle('SECONDARY')
+    } else {
+        eligibilityButton = new MessageButton()
+            .setLabel('Change eligibility.')
+            .setCustomId('add_eligibility')
+            .setStyle('SECONDARY')
+    }
+
+    let openHoursButton;
+    if(embedInfo.index('Open:') === -1) {
+        openHoursButton = new MessageButton()
+            .setLabel('Add open hours.')
+            .setCustomId('add_open_hours')
+            .setStyle('SECONDARY')
+    } else {
+        openHoursButton = new MessageButton()
+            .setLabel('Change open hours.')
+            .setCustomId('add_open_hours')
+            .setStyle('SECONDARY')
+    }
+
+    let languagesButton;
+    if(embedInfo.index('Languages:') === -1) {
+        languagesButton = new MessageButton()
+            .setLabel('Add languages.')
+            .setCustomId('add_languages')
+            .setStyle('SECONDARY')
+    } else {
+        languagesButton = new MessageButton()
+            .setLabel('Change languages.')
+            .setCustomId('add_languages')
+            .setStyle('SECONDARY')
+    }
+
+    const compRowThree = new MessageActionRow()
+        .addComponents(
+            eligibilityButton,
+            openHoursButton,
+            languagesButton,
+        )
+
     const finRow = new MessageActionRow()
         .addComponents(
             new MessageButton()
@@ -224,7 +285,7 @@ const makeMessage = (embedInfo) => {
                 .setCustomId('cancel'),
         )
 
-    return [titleRow, compRowOne, compRowTwo, finRow]
+    return [titleRow, compRowOne, compRowTwo, compRowThree, finRow]
 }
 
 module.exports = createResource

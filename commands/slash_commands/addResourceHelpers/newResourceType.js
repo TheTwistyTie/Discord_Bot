@@ -81,7 +81,7 @@ const addNew = async (interaction) => {
                         ephemeral: true,
                     })
                     const createResource = require('./createResource');
-                    createResource(message.content, btnInt, resources)
+                    createResource(message.content, btnInt)
                 } else {
                     interaction.editReply({
                         content: 'Canceled.',

@@ -4,6 +4,7 @@ const ResourceSchema = new mongoose.Schema({
     guild_id: String,
     resources: [],
     types: [],
+    languages: [],
 
 });
 
