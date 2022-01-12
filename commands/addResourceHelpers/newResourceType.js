@@ -1,4 +1,4 @@
-const Resources = require('../../../models/Resources');
+const Resources = require('../../models/Resources');
 const {MessageActionRow, MessageButton} = require("discord.js");
 
 const addNew = async (interaction) => {

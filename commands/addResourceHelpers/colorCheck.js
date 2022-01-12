@@ -1,5 +1,5 @@
 const colorCheck = async (resourceType, guild_id) => {
-    const Resources = require('../../../models/Resources')
+    const Resources = require('../../models/Resources')
 
     let resources;
     resources = await Resources.findOne({guild_id: guild_id});

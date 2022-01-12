@@ -1,5 +1,5 @@
 const {MessageActionRow, MessageButton} = require("discord.js");
-const RoleSettings = require('../../../models/RoleSettings');
+const RoleSettings = require('../../models/RoleSettings');
 
 const setGenderRoles = async (interaction, btnInt) => {
     const {channel} = interaction

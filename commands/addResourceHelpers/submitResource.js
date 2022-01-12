@@ -1,5 +1,5 @@
 const {MessageActionRow, MessageButton} = require("discord.js");
-const Resources = require('../../../models/Resources');
+const Resources = require('../../models/Resources');
 
 const submitResource = async (embedInfoData, builtEmbed, interaction) => {
     const { channel } = interaction

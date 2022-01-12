@@ -1,5 +1,5 @@
 const {MessageActionRow, MessageSelectMenu} = require("discord.js");
-const RoleSettings = require('../../../models/RoleSettings');
+const RoleSettings = require('../../models/RoleSettings');
 
 const regionRole = async (interaction, btnInt) => {
     const {channel} = interaction

@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const {MessageActionRow, MessageSelectMenu} = require("discord.js");
-const Resources = require('../../models/Resources');
+const Resources = require('../models/Resources');
 const addNew = require('./addResourceHelpers/newResourceType');
 const createResource = require('./addResourceHelpers/createResource');
 

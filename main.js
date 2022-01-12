@@ -5,7 +5,7 @@ const Discord = require('discord.js')
 const fs = require('fs')
 const Database = require('./config/Database');
 const db = new Database();
-const setPermissions = require('./commands/setCommandPermissions')
+const setPermissions = require('./setCommandPermissions')
 
 db.connect();
 
@@ -26,23 +26,13 @@ const guildId = process.env.GUILD_ID;
 
 const guild = client.guilds.cache.get(guildId);
 
-client.commands = new Discord.Collection()
 client.slashCommands = new Discord.Collection()
 
-const commandFiles = fs.readdirSync('./commands/base_commands').filter(file => file.endsWith('.js'));
-
-for(const command of commandFiles) {
-    const commandFile = require(`./commands/base_commands/${command}`)
-    if(commandFile) {
-        client.commands.set(commandFile.name, commandFile)
-    }
-}
-
 const slash = []
-let slashFiles = fs.readdirSync('./commands/slash_commands').filter(file => file.endsWith('.js'));
+let slashFiles = fs.readdirSync('./commands/').filter(file => file.endsWith('.js'));
 
 for(const file of slashFiles) {
-    const filePath = `./commands/slash_commands/${file}`;
+    const filePath = `./commands/${file}`;
 
     const command = require(filePath);
 
@@ -76,21 +66,7 @@ client.once('ready', () => {
 const prefix = '!'
 
 client.on('messageCreate', (message) => {
-    if(!message.content.startsWith(prefix) || message.author.bot) return;
-
-    const args = message.content.slice(prefix.length).split(/ +/);
-    const commandName = args.shift().toLowerCase();
     
-    if(!client.commands.get(commandName)) {
-        return message.reply('Unknown Command.')
-                .then(() => {
-                    setTimeout(() => {
-                        client.commands.get('clear').execute(message, ['2'], Discord)
-                    }, 1500);
-                });
-    }
-
-    client.commands.get(commandName).execute(message, args, Discord, client);
 });
 
 client.on('interactionCreate', (interaction) => {
