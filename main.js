@@ -5,6 +5,7 @@ const Discord = require('discord.js')
 const fs = require('fs')
 const Database = require('./config/Database');
 const db = new Database();
+const setPermissions = require('./commands/setCommandPermissions')
 
 db.connect();
 
@@ -68,6 +69,8 @@ const rest = new REST({version: '9'}).setToken(process.env.TOKEN);
 
 client.once('ready', () => {
     console.log("Bot is Online");
+
+    setPermissions(client);
 });
 
 const prefix = '!'

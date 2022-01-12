@@ -150,7 +150,7 @@ const makeMessage = (embedInfo) => {
         )
 
     let urlButton;
-    if(!embedInfo.url) {
+    if(typeof embedInfo.url === 'undefined') {
         urlButton = new MessageButton()
             .setLabel('Add a link')
             .setCustomId('add_url')
@@ -163,7 +163,7 @@ const makeMessage = (embedInfo) => {
     }
 
     let imgButton;
-    if(!embedInfo.image) {
+    if(typeof embedInfo.image === 'undefined') {
         imgButton = new MessageButton()
             .setLabel('Add an image.')
             .setCustomId('add_image')
@@ -220,11 +220,25 @@ const makeMessage = (embedInfo) => {
             .setStyle('SECONDARY')
     }
 
+    let languagesButton;
+    if(embedInfo.index('Languages:') === -1) {
+        languagesButton = new MessageButton()
+            .setLabel('Add languages.')
+            .setCustomId('add_languages')
+            .setStyle('SECONDARY')
+    } else {
+        languagesButton = new MessageButton()
+            .setLabel('Change languages.')
+            .setCustomId('add_languages')
+            .setStyle('SECONDARY')
+    }
+
     const compRowTwo = new MessageActionRow()
         .addComponents(
             numButton,
             emailButton,
             addressButton,
+            languagesButton,
         )
 
     let eligibilityButton;
@@ -253,24 +267,10 @@ const makeMessage = (embedInfo) => {
             .setStyle('SECONDARY')
     }
 
-    let languagesButton;
-    if(embedInfo.index('Languages:') === -1) {
-        languagesButton = new MessageButton()
-            .setLabel('Add languages.')
-            .setCustomId('add_languages')
-            .setStyle('SECONDARY')
-    } else {
-        languagesButton = new MessageButton()
-            .setLabel('Change languages.')
-            .setCustomId('add_languages')
-            .setStyle('SECONDARY')
-    }
-
     const compRowThree = new MessageActionRow()
         .addComponents(
             eligibilityButton,
             openHoursButton,
-            languagesButton,
         )
 
     const finRow = new MessageActionRow()

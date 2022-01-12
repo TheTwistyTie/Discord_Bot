@@ -11,7 +11,6 @@ class EmbedInfo {
 
     setName (name) {
         this.#fieldsArray[0].name = name
-        console.log(this.#fieldsArray[0].name)
     }
 
     setDescription (description) {
@@ -65,7 +64,6 @@ class EmbedInfo {
             this.#fieldsArray.push({
                 name: 'Eligibility:',
                 value: Eligibility,
-                inline: true,
             })
         }
     }
@@ -78,7 +76,6 @@ class EmbedInfo {
             this.#fieldsArray.push({
                 name: 'Open:',
                 value: Open,
-                inline: true,
             })
         }
     }
@@ -104,7 +101,7 @@ class EmbedInfo {
             image: this.#image,
             url: this.#url,
             fields: this.#fieldsArray,
-            timestamp: new Date()
+            timestamp: new Date(),
         }
 
         submitResource(embedData, this.buildEmbed(true), interaction)
@@ -113,6 +110,7 @@ class EmbedInfo {
     constructor(resourceType, color)
     {
         this.#title = resourceType;
+
         if(!color) {
             this.#color = '#ffffff'
         } else {
@@ -167,7 +165,7 @@ class EmbedInfo {
             newEmbed.setURL(this.#url);
         }
 
-        if(typeof this.image !== 'undefined'){
+        if(typeof this.#image !== 'undefined'){
             newEmbed.setImage(this.#image);
             newEmbed.setThumbnail(this.#image);
         }

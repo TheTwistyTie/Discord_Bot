@@ -38,6 +38,7 @@ const submitResource = async (embedInfoData, builtEmbed, interaction) => {
             interaction.editReply({
                 content: 'Confimed',
                 components: [],
+                embeds: [],
                 ephemeral: true,
             })
 

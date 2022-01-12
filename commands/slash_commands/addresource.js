@@ -7,7 +7,8 @@ const createResource = require('./addResourceHelpers/createResource');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('addresource')
-        .setDescription('Providers and Partners can use this to add resources that users can search for.'),
+        .setDescription('Providers and Partners can use this to add resources that users can search for.')
+        .setDefaultPermission(false),
 
     async execute(interaction) {
         //Enter Command Here
