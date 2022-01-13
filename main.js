@@ -1,12 +1,16 @@
 require('dotenv').config()
+
 const { REST } = require('@discordjs/rest')
 const { Routes } = require('discord-api-types/v9')
 const Discord = require('discord.js')
+
 const fs = require('fs')
+
+const bannedWords = require('./moderation/bannedWords')
+const setPermissions = require('./setPermissions')
+
 const Database = require('./config/Database');
 const db = new Database();
-const setPermissions = require('./setCommandPermissions')
-
 db.connect();
 
 const client = new Discord.Client({
@@ -66,9 +70,15 @@ client.once('ready', () => {
 const prefix = '!'
 
 client.on('messageCreate', (message) => {
-    
-});
+    if(message.author.bot) return;
 
+    bannedWords(message, client)
+});
+/*
+client
+    .on("debug", console.log)
+    .on("warn", console.log)
+*/
 client.on('interactionCreate', (interaction) => {
     if(!interaction.isCommand()) return;
 
