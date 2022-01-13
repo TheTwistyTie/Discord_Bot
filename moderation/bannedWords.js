@@ -35,14 +35,23 @@ const bannedWordsArray = [
     'fucked',
     'fuckbitch',
     'motherfucker',
+    'motherfucking',
+    'fucking',
+    'fucker',
     'fucktoy',
+    'fuk',
 
     'shit',
     'shitting',
 
     'bastard',
     'bellend',
+    
     'bloodclaat',
+    'battyboy',
+    'battyboi',
+    'batty',
+    
     'chilf',
     'choad',
     'clunge',
@@ -52,8 +61,23 @@ const bannedWordsArray = [
     'punani',
     'pussy',
     'snatch',
+    
     'tits',
+    'titties',
+    'tities',
+    
     'twat',
+    
+    'nigger',
+    'nigga',
+    'spick',
+    'wetbag',
+    'spic',
+    'fag',
+    'faggot',
+    'pato',
+    'fudgepacker',
+    
 ]
 
 const moderationChannel = '787708029781016587';
