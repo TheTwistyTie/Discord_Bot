@@ -244,6 +244,9 @@ const bannedWordsArray = [
     'fucked',
     'fuckbitch',
     'motherfucker',
+    'motherfucking',
+    'fucking',
+    'fucker',
     'fucktoy',
     'skullfuck',
     'freex',
@@ -720,8 +723,23 @@ const bannedWordsArray = [
     'minge',
     'pussy',
     'snatch',
+    
     'tits',
+    'titties',
+    'tities',
+    
     'twat',
+    
+    'nigger',
+    'nigga',
+    'spick',
+    'wetbag',
+    'spic',
+    'fag',
+    'faggot',
+    'pato',
+    'fudgepacker',
+    
 ]
 
 const moderationChannel = '787708029781016587';
