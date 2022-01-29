@@ -1,7 +1,8 @@
 const {MessageActionRow, MessageButton} = require("discord.js");
-const Resources = require('../../models/Resources');
+const Resource = require("../../models/Resource");
+const Resources = require('../../models/ResourceSettings');
 
-const submitResource = async (embedInfoData, builtEmbed, interaction) => {
+const submitResource = async (embedInfoData, builtEmbed, previewEmbed, interaction) => {
     const { channel } = interaction
 
     const row = new MessageActionRow()
@@ -42,15 +43,20 @@ const submitResource = async (embedInfoData, builtEmbed, interaction) => {
                 ephemeral: true,
             })
 
-            let resources;
-            resources = await Resources.findOne({guild_id: channel.guild.id});
+            //let resource;
+            //resource = await Resource.findOne({guild_id: channel.guild.id});
 
-            resources.resources.push({
-                embedData: embedInfoData,
-                embed: builtEmbed,
+            //if(!resource)
+            const resource = new Resource({
+                guild_id: btnInt.guild.id,
+                data: {
+                    embedData: embedInfoData,
+                    fullEmbed: builtEmbed,
+                    previewEmbed: previewEmbed,
+                }
             })
 
-            resources.save(err => {
+            resource.save(err => {
                 if(err) {
                     console.log(err);
                     interaction.reply({
@@ -66,7 +72,7 @@ const submitResource = async (embedInfoData, builtEmbed, interaction) => {
                 }
 
                 channel.send({
-                    content: `Added Rescource types.`,
+                    content: `Added Rescource.`,
                 }).then(() => {
                     setTimeout( async () => {
                         await channel.messages.fetch({limit: '1'}).then(messages =>{

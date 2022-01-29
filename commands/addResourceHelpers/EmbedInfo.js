@@ -1,115 +1,14 @@
 const {MessageEmbed} = require("discord.js");
 const submitResource = require("./submitResource");
 
+const buildEmbed = require('./buildEmbed');
+const buildPreviewEmbed = require('./buildPreviewEmbed');
+
+const Resources = require("../../models/ResourceSettings");
+
 class EmbedInfo {
-    index (string) {
-        for(i = 1; i < this.#fieldsArray.length; i++) {
-            if(this.#fieldsArray[i].name === `${string}`) return i;
-        }
-        return -1;
-    }
-
-    setName (name) {
-        this.#fieldsArray[0].name = name
-    }
-
-    setDescription (description) {
-        this.#fieldsArray[0].value = description
-    }
-
-    addPhoneNumber (number) {
-        const result = this.index('Phone Number:')
-        if(result !== -1) {
-            this.#fieldsArray[result].value = number;
-        } else {
-            this.#fieldsArray.push({
-                name: 'Phone Number:',
-                value: number,
-                inline: true,
-            })
-        }
-    }
-
-    addEmail (email) {
-        const result = this.index('Email Address:')
-        if(result !== -1) {
-            this.#fieldsArray[result].value = email;
-        } else {
-            this.#fieldsArray.push({
-                name: 'Email Address:',
-                value: email,
-                inline: true,
-            })
-        }
-    }
-
-    addAddress (address) {
-        const result = this.index('Address:')
-        if(result !== -1) {
-            this.#fieldsArray[result].value = address;
-        } else {
-            this.#fieldsArray.push({
-                name: 'Address:',
-                value: address,
-                inline: true,
-            })
-        }
-    }
-
-    addEligibility (Eligibility) {
-        const result = this.index('Eligibility:')
-        if(result !== -1) {
-            this.#fieldsArray[result].value = Eligibility;
-        } else {
-            this.#fieldsArray.push({
-                name: 'Eligibility:',
-                value: Eligibility,
-            })
-        }
-    }
-
-    addOpenHours (Open) {
-        const result = this.index('Open:')
-        if(result !== -1) {
-            this.#fieldsArray[result].value = Open;
-        } else {
-            this.#fieldsArray.push({
-                name: 'Open:',
-                value: Open,
-            })
-        }
-    }
-
-    addLanguages (Languages) {
-        const result = this.index('Languages:')
-        if(result !== -1) {
-            this.#fieldsArray[result].value = Languages;
-        } else {
-            this.#fieldsArray.push({
-                name: 'Languages:',
-                value: Languages,
-                inline: true,
-            })
-        }
-    }
-
-    submit (interaction) {
-        const embedData = {
-            resourceType: this.#title,
-            description: this.#description,
-            color: this.#color,
-            image: this.#image,
-            url: this.#url,
-            fields: this.#fieldsArray,
-            timestamp: new Date(),
-        }
-
-        submitResource(embedData, this.buildEmbed(true), interaction)
-    }
-
-    constructor(resourceType, color)
-    {
-        this.#title = resourceType;
+    constructor(resourceType, color) {
+        this.#resourceType = resourceType;
 
         if(!color) {
             this.#color = '#ffffff'
@@ -118,63 +17,251 @@ class EmbedInfo {
         }
     }
 
+    #resourceType
+    #title = 'Unnamed';
+    #description = '\u200b';
     #color;
-    #title;
-    get resourceType() {
-        return this.#title
+    #image;
+    #thumbnail;
+    #url;
+    #regionText;
+    #regionArray = [];
+
+    #OpenHours = {
+        name: 'Open:',
+    }
+    #Elegibility = {
+        name: 'Eligibility:',
+    }
+    #Languages = {
+        name: 'Languages:',
+    }
+    #Address = {
+        name: 'Address:',
+    }
+    #Email = {
+        name: 'Email Address:',
+    }
+    #Number = {
+        name: 'Phone Number:',
+    }
+    #Description = {
+        name: 'Description:',
+        value: 'Default Description.',
     }
 
-    #description = '\n\u200b';
+    inLine = false;
 
+    get ResourceName() {
+        return this.#title
+    }
+    get ResourceType() {
+        return this.#resourceType
+    }
+    get ResourceDescription() {
+        return this.#Description.value
+    }
+    GetFields() {
+        let fields = [
+            this.#Description
+        ];
 
-    #image;
+        if(this.HasNumber()) {
+            fields.push(this.#Number)
+        }
+
+        if(this.HasEmail()) {
+            fields.push(this.#Email)
+        }
+
+        if(this.HasAddress()) {
+            fields.push(this.#Address)
+        }
+
+        if(this.HasLanguages()) {
+            fields.push(this.#Languages)
+        }
+
+        if(this.HasElegibility()) {
+            fields.push(this.#Elegibility)
+        }
+
+        if(this.HasOpenHours()) {
+            fields.push(this.#OpenHours)
+        }
+
+        return fields
+    }
+    
+    HasImage() {
+        if(typeof this.#image === 'undefined') {
+            return false
+        }
+        return true
+    }
+    HasThumbnail() {
+        if(typeof this.#thumbnail === 'undefined') {
+            return false
+        } 
+        return true
+    }
+    HasURL() {
+        if(typeof this.#url === 'undefined') {
+            return false
+        }
+        return true
+    }
+    HasNumber () {
+        if(typeof this.#Number.value !== 'undefined') {
+            return true;
+        }
+        return false
+    }
+    HasEmail() {
+        if(typeof this.#Email.value !== 'undefined') {
+            return true;
+        }
+        return false
+    }
+    HasAddress() {
+        if(typeof this.#Address.value !== 'undefined') {
+            return true;
+        }
+        return false
+    }
+    HasLanguages() {
+        if(typeof this.#Languages.value !== 'undefined') {
+            return true;
+        }
+        return false
+    }
+    HasElegibility() {
+        if(typeof this.#Elegibility.value !== 'undefined') {
+            return true;
+        }
+        return false
+    }
+    HasOpenHours() {
+        if(typeof this.#OpenHours.value !== 'undefined') {
+            return true;
+        }
+        return false
+    }
+    HasRegions () {
+        if(this.#regionArray.length > 0) {
+            return true
+        }
+        return false
+    }
+
     setImage(value) {
         this.#image = value;
     }
-
-    #url;
+    setThumbnail(value) {
+        this.#thumbnail = value;
+    }
     setUrl(value) {
         this.#url = value;
     }
-
-    #fieldsArray = [{
-        name: 'Default Title.',
-        value: "Default Description."
-    }];
-
-    getResourceName() {
-        return this.#fieldsArray[0].name
+    setName (name) {
+        this.#title = name
     }
-    getResourceDescription() {
-        return this.#fieldsArray[0].value
+    setDescription (description) {
+        this.#Description.value = description
     }
 
-    buildEmbed(final) {
-        let newEmbed = new MessageEmbed()
-        .setColor(this.#color)
-        .setDescription(this.#description)
-        .setFields(this.#fieldsArray)
+    addPhoneNumber (Number) {
+        this.#Number['value'] = Number
+    }
+    addEmail (Email) {
+        this.#Email['value'] = Email
+    }
+    addAddress (Address) {
+        this.#Address['value'] = Address
+    }
+    addLanguages (Languages) {
+        this.#Languages['value'] = Languages
+    }
+    addEligibility (Eligibility) {
+        this.#Elegibility['value'] = Eligibility
+    }
+    addOpenHours (Open) {
+        this.#OpenHours['value'] = Open
+    }
+    addRegions (Regions) {
+        this.#regionArray = Regions;
 
-        if(typeof this.#title !== 'undefined'){
-            newEmbed.setTitle(this.#title);
-        } else {
-            newEmbed.setTitle('Error setting title.');
+        this.#regionText = 'Regions: '
+        for(i = 0; i < Regions.length - 1; i++) {
+            this.#regionText += Regions[i] + ', '
+        }
+        this.#regionText += Regions[Regions.length - 1]
+    }
+
+    toggleInline() {
+        this.inLine = !this.inLine
+
+        this.#Number.inline = this.inLine
+        this.#Email.inline = this.inLine
+        this.#Address.inline = this.inLine
+        this.#Languages.inline = this.inLine
+    }
+
+    buildEmbed() {
+        const fields = this.GetFields()
+
+        const embedData = {
+            title: this.#title,
+            resourceType: this.#resourceType,
+            color: this.#color,
+            image: this.#image,
+            thumbnail: this.#thumbnail,
+            url: this.#url,
+            fields: fields,
+            hours: this.#OpenHours,
+            elegibility: this.#Elegibility,
+            languages: this.#Languages,
+            address: this.#Address,
+            email: this.#Email,
+            number: this.#Number,
+            description: this.#Description,
+            regions: this.#regionArray,
+            regionText: this.#regionText,
+            timestamp: new Date(),
         }
 
-        if(typeof this.#url !== 'undefined'){
-            newEmbed.setURL(this.#url);
+        return [buildEmbed(embedData)]
+    }
+
+    async submit (interaction) {
+        const fields = this.GetFields()
+
+        if(!this.HasRegions()) {
+            let resources = await Resources.findOne({guild_id: interaction.guild.id});
+            this.addRegions(resources.regions)
         }
 
-        if(typeof this.#image !== 'undefined'){
-            newEmbed.setImage(this.#image);
-            newEmbed.setThumbnail(this.#image);
+        const embedData = {
+            title: this.#title,
+            resourceType: this.#resourceType,
+            color: this.#color,
+            image: this.#image,
+            thumbnail: this.#thumbnail,
+            url: this.#url,
+            fields: fields,
+            hours: this.#OpenHours,
+            elegibility: this.#Elegibility,
+            languages: this.#Languages,
+            address: this.#Address,
+            email: this.#Email,
+            number: this.#Number,
+            description: this.#Description,
+            regions: this.#regionArray,
+            regionText: this.#regionText,
+            timestamp: new Date(),
         }
 
-        if(final){
-            newEmbed.setTimestamp()
-        }
-
-        return newEmbed
+        submitResource(embedData, buildEmbed(embedData), buildPreviewEmbed(embedData), interaction)
     }
 }
 

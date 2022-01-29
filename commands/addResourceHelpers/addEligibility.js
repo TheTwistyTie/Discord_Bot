@@ -42,7 +42,7 @@ const addEligibility = async (interaction, embedInfo) => {
         }
 
         const btnMsg = await interaction.editReply({
-            content: `${itemTitle} \'**${eligibility}**\'`,
+            content: `${itemTitle} \n\'**${eligibility}**\'`,
             components: [row],
             ephemeral: true,
             fetchReply: true,

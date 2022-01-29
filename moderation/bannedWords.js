@@ -1,4 +1,4 @@
-const Reports = require('../models/Reports')
+const User = require('../models/User')
 
 const bannedWordsArray = [
     'a55',
@@ -310,7 +310,6 @@ const bannedWordsArray = [
     'herpes',
     'herpy',
     'hitler',
-    'hiv',
     'hobag',
     'hom0',
     'homo',
@@ -778,15 +777,15 @@ const bannedWords = async (message, client) => {
             msg.delete()
         }, 2000))
 
-        let previousReports = await Reports.findOne({id: author.id})
+        let previousReports = await User.findOne({id: author.id})
         if(!previousReports) {
-            previousReports = new Reports({
+            previousReports = new User({
                 id: author.id,
                 name: author.username,
             })
         }
 
-        previousReports.automoderation.push( {
+        previousReports.reports.automoderation.push( {
             words: wordsUsed,
             timestamp: new Date()
         })

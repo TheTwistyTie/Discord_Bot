@@ -1,5 +1,5 @@
 const {MessageActionRow, MessageButton, MessageSelectMenu} = require("discord.js");
-const Resources = require('../../models/Resources');
+const Resources = require('../../models/ResourceSettings');
 const addNewLanguage = require("./newLanguageType");
 
 const itemTitle = 'Languages:'

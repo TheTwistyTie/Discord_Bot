@@ -1,12 +1,10 @@
 const {MessageActionRow, MessageButton} = require("discord.js");
 
-const itemTitle = 'Address:'
-
-const addAddress = async (interaction, embedInfo) => {
+const addThumbnail = async (interaction, embedInfo) => {
     const { channel } = interaction;
 
     const mainMsg = await interaction.reply({
-        content: 'What is the address you want your resource to have?\n\t*Press (Shift + Enter) for a new line.\n\tPress (Enter) to submit.*',
+        content: 'What is the url of the image you want your resource to have?',
         ephemeral: true,
         fetchReply: true,
     })
@@ -15,16 +13,16 @@ const addAddress = async (interaction, embedInfo) => {
         return m.author.id === interaction.user.id
     }
 
-    const addressCollector = channel.createMessageCollector({
+    const urlCollector = channel.createMessageCollector({
         filter,
         max: 1,
     })
 
-    addressCollector.on('collect', async addressMsg => {
-        const address = addressMsg.content;
+    urlCollector.on('collect', async urlMsg => {
+        let url = urlMsg.content;
 
-        await addressMsg.delete()
-        
+        await urlMsg.delete()
+
         const row = new MessageActionRow()
             .addComponents(
                 new MessageButton()
@@ -42,7 +40,7 @@ const addAddress = async (interaction, embedInfo) => {
         }
 
         const btnMsg = await interaction.editReply({
-            content: `${itemTitle} \n\'**${address}**\'`,
+            content: `Image URL: \'**${url}**\'`,
             components: [row],
             ephemeral: true,
             fetchReply: true,
@@ -60,7 +58,7 @@ const addAddress = async (interaction, embedInfo) => {
                     components: [],
                     ephemeral: true,
                 })
-                embedInfo.addAddress(address)
+                embedInfo.setThumbnail(url)
             } else {
                 interaction.editReply({
                     content: 'Canceled',
@@ -75,4 +73,4 @@ const addAddress = async (interaction, embedInfo) => {
     })
 }
 
-module.exports = addAddress;
+module.exports = addThumbnail;

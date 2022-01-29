@@ -1,5 +1,5 @@
 const colorCheck = async (resourceType, guild_id) => {
-    const Resources = require('../../models/Resources')
+    const Resources = require('../../models/ResourceSettings')
 
     let resources;
     resources = await Resources.findOne({guild_id: guild_id});
@@ -10,7 +10,7 @@ const colorCheck = async (resourceType, guild_id) => {
         }
     }
 
-    return '#ffaaaa'
+    return '#ffaa55'
 }
 
 module.exports = colorCheck

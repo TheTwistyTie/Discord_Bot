@@ -2,10 +2,9 @@ const mongoose = require('mongoose');
 
 const ResourceSchema = new mongoose.Schema({
     guild_id: String,
-    resources: [],
     types: [],
     languages: [],
-
+    regions: [],
 });
 
-module.exports = mongoose.model("Resources", ResourceSchema);
+module.exports = mongoose.model("ResourceSettings", ResourceSchema);

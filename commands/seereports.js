@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const Reports = require('../models/Reports')
+const User = require('../models/User')
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -18,8 +18,8 @@ module.exports = {
         
         const user = interaction.options.getUser('user')
 
-        let previousReports = await Reports.findOne({id: user.id})
-        if(!previousReports) {
+        let previousReports = await User.findOne({id: user.id})
+        if(!previousReports || !previousReports.reports) {
             interaction.reply({
                 content: 'No Previous Reports.',
                 ephemeral: true,
@@ -28,8 +28,8 @@ module.exports = {
         else {
             let text = 'This user has pervious reports.\n'
             
-            let numAutomoderationEvents = previousReports.automoderation.length;
-            let numReports = previousReports.reports.length;
+            let numAutomoderationEvents = previousReports.reports.automoderation.length;
+            let numReports = previousReports.reports.userReports.length;
 
             text += `There are ${numAutomoderationEvents} auto-moderation events listed for this user.\n`
             text += `There are ${numReports} reports made on this user.`
@@ -37,7 +37,7 @@ module.exports = {
             if(numReports >= 5) {
                 text += ' Here are the last 5.\n'
                 for(i = numReports - 1; i >= numReports - 5; i--) {
-                    let reports = previousReports.reports;
+                    let reports = previousReports.reports.userReports;
                     let report = reports[i]
 
                     text += `\`\`\`Reason: ${report.reason}\n`
@@ -47,7 +47,7 @@ module.exports = {
             } else if(numReports > 0) {
                 text += ' Here are those reports.\n'
                 for(i = numReports - 1; i >= 0; i--) {
-                    let reports = previousReports.reports;
+                    let reports = previousReports.reports.userReports;
                     let report = reports[i]
 
                     text += `\`\`\`Reason: ${report.reason}\n`

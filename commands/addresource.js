@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const {MessageActionRow, MessageSelectMenu} = require("discord.js");
-const Resources = require('../models/Resources');
+const Resources = require('../models/ResourceSettings');
 const addNew = require('./addResourceHelpers/newResourceType');
 const createResource = require('./addResourceHelpers/createResource');
 
@@ -35,7 +35,7 @@ module.exports = {
                         color: '#4e784c',
                     },
                     {
-                        value: 'Finacial Help',
+                        value: 'Financial Help',
                         color: '#52ec53',
                     },
                     {
@@ -82,7 +82,16 @@ module.exports = {
                 languages: [
                     'English',
                     'Spanish',
-                ]
+                ],
+                regions: [
+                    'Central Connecticut',
+                    'Eastern Connecticut',
+                    'Fairfield',
+                    'Greater Hartford',
+                    'Greater New Haven',
+                    'Middletown Meriden Wallingford',
+                    'North West Connecticut',
+                ],
             })
 
 
@@ -160,7 +169,7 @@ module.exports = {
         resourceTypeCollector.on('collect', async (btnInteraction) => {
             const { values } = btnInteraction
 
-            const value = values[0]
+            const value = values[values.length - 1];
 
             if(value === 'add_new')
             {
@@ -168,7 +177,7 @@ module.exports = {
                     content: "Adding new resource type.",
                     components: []
                 })
-                addNew(btnInteraction)
+                addNew(btnInteraction, values)
             } else {
                 interaction.editReply({
                     content: `Adding ${value}`,

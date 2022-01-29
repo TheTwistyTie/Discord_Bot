@@ -11,6 +11,8 @@ const colorCheck = require('./colorCheck');
 const addEligibility = require("./addEligibility");
 const addOpenHours = require("./addOpenHours");
 const addLanguages = require("./addLanguages");
+const addRegions = require("./addRegions");
+const addThumbnail = require("./addThumbnail");
 
 let preview;
 let btnCollector;
@@ -30,9 +32,9 @@ const createResource = async (resourceType, interaction, oldEmbedInfo) => {
     
     const rows = makeMessage(embedInfo)
     preview = await interaction.reply({
-        content: 'Resource Preview:',
+        content: 'Resource preview:',
         components: rows,
-        embeds: [embedInfo.buildEmbed()],
+        embeds: embedInfo.buildEmbed(),
         ephemeral: true,
         fetchReply: true,
     }) 
@@ -75,7 +77,7 @@ const createResource = async (resourceType, interaction, oldEmbedInfo) => {
                     resourceDescription(btnInt, embedInfo);
                     break;
                 case 'add_url':
-                    contentText = 'Adding a URL...'
+                    contentText = 'Adding an URL...'
                     addUrl(btnInt, embedInfo);
                     break;
                 case 'add_image':
@@ -95,17 +97,29 @@ const createResource = async (resourceType, interaction, oldEmbedInfo) => {
                     addAddress(btnInt, embedInfo);
                     break;
                 case 'add_eligibility':
-                    contextText = 'Adding resource eligibilty...'
+                    contentText = 'Adding resource eligibilty...'
                     addEligibility(btnInt, embedInfo);
                     break;
                 case 'add_open_hours':
-                    contextText = 'Adding Open Hours...'
+                    contentText = 'Adding open hours...'
                     addOpenHours(btnInt, embedInfo)
                     break;
                 case 'add_languages':
-                    contextText = 'Adding Languages...'
+                    contentText = 'Adding languages...'
                     addLanguages(btnInt, embedInfo)
                     break;
+                case 'add_regions':
+                    contentText = 'Adding regions...'
+                    addRegions(btnInt, embedInfo)
+                    break;
+                case 'add_thumbnail':
+                    contentText = 'Adding thumbnail...'
+                    addThumbnail(btnInt, embedInfo)
+                    break;
+                case 'toggle_inline':
+                    contentText = 'Toggling Inline...'
+                    embedInfo.toggleInline();
+                    createResource(embedInfo.ResourceType, btnInt, embedInfo)
             }
             interaction.editReply({
                 content: contentText,
@@ -118,7 +132,7 @@ const createResource = async (resourceType, interaction, oldEmbedInfo) => {
 
 const makeMessage = (embedInfo) => {
     let titleButton;
-    if(embedInfo.getResourceName() === 'Default Title.') {
+    if(embedInfo.ResourceName === 'Unnamed') {
         titleButton = new MessageButton()
             .setLabel('Set the Title')
             .setCustomId('change_title')
@@ -131,7 +145,7 @@ const makeMessage = (embedInfo) => {
     }
 
     let descButton;
-    if(embedInfo.getResourceDescription() === 'Default Description.') {
+    if(embedInfo.ResourceDescription === 'Default Description.') {
         descButton = new MessageButton()
             .setLabel('Set the Description')
             .setCustomId('change_description')
@@ -150,7 +164,7 @@ const makeMessage = (embedInfo) => {
         )
 
     let urlButton;
-    if(typeof embedInfo.url === 'undefined') {
+    if(!embedInfo.HasURL()) {
         urlButton = new MessageButton()
             .setLabel('Add a link')
             .setCustomId('add_url')
@@ -163,7 +177,7 @@ const makeMessage = (embedInfo) => {
     }
 
     let imgButton;
-    if(typeof embedInfo.image === 'undefined') {
+    if(!embedInfo.HasImage()) {
         imgButton = new MessageButton()
             .setLabel('Add an image.')
             .setCustomId('add_image')
@@ -175,14 +189,28 @@ const makeMessage = (embedInfo) => {
             .setStyle('SECONDARY')
     }
 
+    let thumbnailButton;
+    if(!embedInfo.HasThumbnail()) {
+        thumbnailButton = new MessageButton()
+            .setLabel('Add a thumbnail')
+            .setCustomId('add_thumbnail')
+            .setStyle('SECONDARY')
+    } else {
+        thumbnailButton = new MessageButton()
+            .setLabel('Change the thumbnail')
+            .setCustomId('add_thumbnail')
+            .setStyle('SECONDARY')
+    }
+
     const compRowOne = new MessageActionRow()
         .addComponents(
             urlButton,
             imgButton,
+            thumbnailButton,
         )
 
     let numButton;
-    if(embedInfo.index('Phone Number:') === -1) {
+    if(!embedInfo.HasNumber()) {
         numButton = new MessageButton()
             .setLabel('Add a phone number.')
             .setCustomId('add_phone_number')
@@ -195,7 +223,7 @@ const makeMessage = (embedInfo) => {
     }
 
     let emailButton;
-    if(embedInfo.index('Email Address:') === -1) {
+    if(!embedInfo.HasEmail()) {
         emailButton = new MessageButton()
             .setLabel('Add an email address.')
             .setCustomId('add_email')
@@ -208,7 +236,7 @@ const makeMessage = (embedInfo) => {
     }
 
     let addressButton;
-    if(embedInfo.index('Address:') === -1) {
+    if(!embedInfo.HasAddress()) {
         addressButton = new MessageButton()
             .setLabel('Add an address.')
             .setCustomId('add_address')
@@ -221,7 +249,7 @@ const makeMessage = (embedInfo) => {
     }
 
     let languagesButton;
-    if(embedInfo.index('Languages:') === -1) {
+    if(!embedInfo.HasLanguages()) {
         languagesButton = new MessageButton()
             .setLabel('Add languages.')
             .setCustomId('add_languages')
@@ -233,16 +261,30 @@ const makeMessage = (embedInfo) => {
             .setStyle('SECONDARY')
     }
 
+    let toggleButton;
+    if(!embedInfo.inline) {
+        toggleButton = new MessageButton()
+            .setLabel('Set Inline')
+            .setCustomId('toggle_inline')
+            .setStyle('SECONDARY')
+    } else {
+        toggleButton = new MessageButton()
+            .setLabel('On seperate lines')
+            .setCustomId('toggle_inline')
+            .setStyle('SECONDARY')
+    }
+
     const compRowTwo = new MessageActionRow()
         .addComponents(
             numButton,
             emailButton,
             addressButton,
             languagesButton,
+            toggleButton,
         )
 
     let eligibilityButton;
-    if(embedInfo.index('Eligibility:') === -1) {
+    if(!embedInfo.HasElegibility()) {
         eligibilityButton = new MessageButton()
             .setLabel('Add eligibility.')
             .setCustomId('add_eligibility')
@@ -255,7 +297,7 @@ const makeMessage = (embedInfo) => {
     }
 
     let openHoursButton;
-    if(embedInfo.index('Open:') === -1) {
+    if(!embedInfo.HasOpenHours()) {
         openHoursButton = new MessageButton()
             .setLabel('Add open hours.')
             .setCustomId('add_open_hours')
@@ -267,10 +309,24 @@ const makeMessage = (embedInfo) => {
             .setStyle('SECONDARY')
     }
 
+    let regionsButton;
+    if(!embedInfo.HasRegions()) {
+        regionsButton = new MessageButton()
+            .setLabel('Add regions.')
+            .setCustomId('add_regions')
+            .setStyle('SECONDARY')
+    } else {
+        regionsButton = new MessageButton()
+            .setLabel('Change regions.')
+            .setCustomId('add_regions')
+            .setStyle('SECONDARY')
+    }
+
     const compRowThree = new MessageActionRow()
         .addComponents(
             eligibilityButton,
             openHoursButton,
+            regionsButton,
         )
 
     const finRow = new MessageActionRow()

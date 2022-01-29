@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const Reports = require('../models/Reports')
+const User = require('../models/User')
 
 const moderationChannel = '787708029781016587'
 
@@ -36,15 +36,15 @@ module.exports = {
             `<@${interaction.user.id}>: reported ${user} in ${channel} for reason:\n${reason}`
         )
 
-        let previousReports = await Reports.findOne({id: user.id})
+        let previousReports = await User.findOne({id: user.id})
         if(!previousReports) {
-            previousReports = new Reports({
+            previousReports = new User({
                 id: user.id,
                 name: user.username,
             })
         }
 
-        previousReports.reports.push( {
+        previousReports.reports.userReports.push( {
             reported_by: interaction.user.username,
             reason: reason,
             timestamp: new Date()
