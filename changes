@@ -1,0 +1,4 @@
+Switched resource finding, and creation to direct messages for better security.
+same with the beginings of the provider searching.
+
+created a control panel for commands rather than having user's use slash commands.

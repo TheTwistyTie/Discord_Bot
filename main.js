@@ -10,6 +10,8 @@ const bannedWords = require('./moderation/bannedWords')
 const setPermissions = require('./setPermissions')
 
 const Database = require('./config/Database');
+const adminCommands = require('./textCommands/commandHandler')
+const eventHandler = require('./buttons/eventHandler')
 const db = new Database();
 db.connect();
 
@@ -33,10 +35,10 @@ const guild = client.guilds.cache.get(guildId);
 client.slashCommands = new Discord.Collection()
 
 const slash = []
-let slashFiles = fs.readdirSync('./commands/').filter(file => file.endsWith('.js'));
+let slashFiles = fs.readdirSync('./slashCommands/').filter(file => file.endsWith('.js'));
 
 for(const file of slashFiles) {
-    const filePath = `./commands/${file}`;
+    const filePath = `./slashCommands/${file}`;
 
     const command = require(filePath);
 
@@ -69,29 +71,31 @@ client.once('ready', () => {
 
 const prefix = '!'
 
-client.on('messageCreate', (message) => {
+client.on('messageCreate', async (message) => {
     if(message.author.bot) return;
 
     bannedWords(message, client)
+
+    if(message.content.startsWith(prefix)) {
+        adminCommands(message)
+    }
 });
-/*
-client
-    .on("debug", console.log)
-    .on("warn", console.log)
-*/
+
 client.on('interactionCreate', (interaction) => {
-    if(!interaction.isCommand()) return;
+    if(interaction.isCommand()) {
+        const {commandName} = interaction
 
-    const {commandName} = interaction
+        const command = client.slashCommands.get(commandName)
 
-    const command = client.slashCommands.get(commandName)
-
-    if(!command) return;
-    try {
-        command.execute(interaction, client)
-    } catch (e)
-    {
-        return console.log(e)
+        if(!command) return;
+        try {
+            command.execute(interaction, client)
+        } catch (e)
+        {
+            return console.log(e)
+        }
+    } else if (interaction.isButton()) {
+        eventHandler(interaction)
     }
 })
 

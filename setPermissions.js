@@ -8,6 +8,7 @@ const commands = {
     clear: '925190550053855252',
     report: '931254027163951114',
     seereports: '931276142638407791',
+    setwelcomemessage: '941348425029541888',
     commandToDelete: null,
 }
 
@@ -26,7 +27,7 @@ const setPermissions = async (client) => {
     
 
     const fullPermissions = [
-        {
+        /*{
             id: commands.addRecource,
             permissions: [
                 {
@@ -50,7 +51,7 @@ const setPermissions = async (client) => {
                     permission: true,
                 },
             ],
-        },
+        },*/
         {
             id: commands.clear,
             permissions: [
@@ -80,7 +81,22 @@ const setPermissions = async (client) => {
                     permission: true,
                 },
             ]
-        }
+        },
+        /*{
+            id: commands.setwelcomemessage,
+            permissions: [
+                {
+                    id: roles.admin,
+                    type: 'ROLE',
+                    permission: true,
+                },
+                {
+                    id: roles.staff,
+                    type: 'ROLE',
+                    permission: true,
+                },
+            ]
+        }*/
     ];
 
     await client.guilds.cache.get(guildId)?.commands.permissions.set({ fullPermissions });
@@ -88,6 +104,15 @@ const setPermissions = async (client) => {
     if(commands.commandToDelete !== null) {
         deleteCommand(commands.commandToDelete);
     }
+
+    client.on('guildMemberAdd', member => {
+        if(night)
+        {
+            member.setRoles([nightMember])
+        } else {
+            member.setRoles([member]);
+        }
+    });
 
     startCloseCycle(client.guilds.cache.get(guildId))
 
@@ -104,11 +129,13 @@ const deleteCommand = (guildId, commandId) => {
     }).catch(console.error);
 }
 
+let night = false;
 const startCloseCycle = (client) => {
     cron.schedule('59 23 * * *', async () => {
         console.log('Switching server to night mode...')
-        const oldRole = guild.roles.cache.get(roles.member);
+        night = true;
 
+        const oldRole = guild.roles.cache.get(roles.member);
         oldRole.members.each(member => {
             member.roles.remove(oldRole)
             member.roles.add(roles.nightMember)
@@ -117,8 +144,9 @@ const startCloseCycle = (client) => {
     
     cron.schedule('59 6 * * *', () => {
         console.log('Switching server to day mode...')
-        const oldRole = guild.roles.cache.get(roles.nightMember);
+        night = false;
 
+        const oldRole = guild.roles.cache.get(roles.nightMember);
         oldRole.members.each(member => {
             member.roles.remove(oldRole)
             member.roles.add(roles.member)
