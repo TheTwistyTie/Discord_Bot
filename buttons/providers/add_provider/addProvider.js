@@ -39,7 +39,7 @@ const addProvider = async (interaction) => {
         const confCollect = await confMessage.createMessageComponentCollector()
         confCollect.on('collect', (confInt) => {
             if(confInt.customId === 'confirm') {
-                createProvider(providerName.content, confInt);
+                createProvider(providerName.content, confInt, interaction.guild);
             } else {
                 confInt.reply('Cancled.')
             }

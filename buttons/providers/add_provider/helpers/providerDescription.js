@@ -1,10 +1,10 @@
 const {MessageActionRow, MessageButton} = require("discord.js");
 
-const addThumbnail = async (interaction, embedInfo) => {
+const providerDescription = async (interaction, embedInfo) => {
     const { channel } = interaction;
 
     const mainMsg = await interaction.reply({
-        content: 'What is the url of the image you want your resource to have?',
+        content: 'What would you like the description to be?',
         fetchReply: true,
     })
 
@@ -12,22 +12,14 @@ const addThumbnail = async (interaction, embedInfo) => {
         return m.author.id === interaction.user.id
     }
 
-    const urlCollector = channel.createMessageCollector({
+    const descriptionCollector = channel.createMessageCollector({
         filter,
-        max: 1,
+        max: 1
     })
 
-    urlCollector.on('collect', async urlMsg => {
-        let url;
-        if(urlMsg.attachments.size == 0) {
-
-            url = urlMsg.content;
-
-        } else {
-
-            url = urlMsg.attachments.first().url;
-            
-        }
+    descriptionCollector.on('collect', async descMsg => {
+        
+        const description = descMsg.content;
 
         const row = new MessageActionRow()
             .addComponents(
@@ -41,39 +33,39 @@ const addThumbnail = async (interaction, embedInfo) => {
                     .setStyle('DANGER')
             )
 
-        const btnFilter = (m) => {
-            return interaction.user.id === m.user.id
-        }
-
         const btnMsg = await interaction.editReply({
-            content: `Image URL: \'**${url}**\'`,
+            content: `Set the description as: \t\'**${description}**\'`,
             components: [row],
             fetchReply: true,
         })
 
-        const confCollector = await btnMsg.createMessageComponentCollector({
+        const btnFilter = (m) => {
+            return interaction.user.id === m.user.id
+        }
+
+        const confCollector = btnMsg.createMessageComponentCollector({
             btnFilter,
-            max: 1,
+            max: 1
         })
 
         confCollector.on('collect', (btnInt) => {
             if(btnInt.customId === 'continue') {
                 interaction.editReply({
-                    content: 'Confimed',
+                    content: `Description Set`,
                     components: [],
                 })
-                embedInfo.setThumbnail(url)
+                embedInfo.setDescription(description);
             } else {
                 interaction.editReply({
-                    content: 'Canceled',
+                    content: `Canceled.`,
                     components: [],
                 })
             }
-
-            const createResource = require("./createResource");
-            createResource(embedInfo.resourceType, btnInt, embedInfo.Guild, embedInfo);
+            
+            const createProvider = require("./createProvider");
+            createProvider(embedInfo.Name, btnInt, embedInfo.Guild, embedInfo);
         })
     })
 }
 
-module.exports = addThumbnail;
+module.exports = providerDescription;

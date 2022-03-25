@@ -1,7 +1,9 @@
 const Resources = require('../../../../models/ResourceSettings');
+const createResource = require('./createResource');
 const {MessageActionRow, MessageButton} = require("discord.js");
+const EmbedInfo = require('./EmbedInfo');
 
-const addNew = async (interaction , guild) => {
+const addNew = async (interaction , guild, providerData) => {
     let resources;
     resources = await Resources.findOne({guild_id: guild.id});
     
@@ -60,8 +62,13 @@ const addNew = async (interaction , guild) => {
                     
                 })
 
-                const createResource = require('./createResource');
-                createResource(message.content, btnInt)
+                const embedInfo = new EmbedInfo(message.content, '#808080', guild)
+            
+                if(typeof providerData !== 'undefinded') {
+                    embedData.addProviderData(providerData)
+                }
+
+                createResource(message.content, btnInt, embedInfo)
             } else {
                 interaction.editReply({
                     content: 'Canceled.',

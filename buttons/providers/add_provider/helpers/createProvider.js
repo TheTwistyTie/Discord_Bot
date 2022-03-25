@@ -1,12 +1,22 @@
 const {MessageActionRow, MessageButton} = require("discord.js");
 const EmbedInfo = require('./EmbedInfo');
+const resourceDescription = require('./providerDescription');
+const addUrl = require('./addUrl');
+const addPhoneNumber = require('./addPhoneNumber');
+const addEmail = require('./addEmail');
+const addAddress = require('./addAddress');
+const addOpenHours = require('./addOpenHours');
+const addLanguages = require('./addLanguages');
+const addRegions = require('./addRegions');
+const addThumbnail = require('./addThumbnail');
 
-const createProvider = async (name, interaction, oldEmbedInfo) => {
+
+const createProvider = async (name, interaction, Guild, oldEmbedInfo) => {
     const {channel} = interaction;
 
     let embedInfo;
     if(!oldEmbedInfo){
-        embedInfo = new EmbedInfo(name)
+        embedInfo = new EmbedInfo(name, Guild)
     } else {
         embedInfo = oldEmbedInfo;
     }
@@ -82,13 +92,13 @@ const createProvider = async (name, interaction, oldEmbedInfo) => {
                     addRegions(btnInt, embedInfo)
                     break;
                 case 'add_thumbnail':
-                    contentText = 'Adding thumbnail...'
+                    contentText = 'Adding logo...'
                     addThumbnail(btnInt, embedInfo)
                     break;
                 case 'toggle_inline':
                     contentText = 'Toggling Inline...'
                     embedInfo.toggleInline();
-                    createResource(embedInfo.ResourceType, btnInt, embedInfo)
+                    createProvider(embedInfo.Name, btnInt, embedInfo.Guild, embedInfo)
             }
             interaction.editReply({
                 content: contentText,
@@ -129,7 +139,7 @@ const getComponents = (embedInfo) => {
     let thumbnailButton;
     if(!embedInfo.HasThumbnail()) {
         thumbnailButton = new MessageButton()
-            .setLabel('Add a thumbnail')
+            .setLabel('Add a logo')
             .setCustomId('add_thumbnail')
             .setStyle('SECONDARY')
     } else {

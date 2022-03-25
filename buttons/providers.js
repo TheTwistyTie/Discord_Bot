@@ -2,6 +2,7 @@ const { MessageActionRow, MessageButton } = require("discord.js")
 const UserData = require('../models/User');
 const GuildSettings = require('../models/GuildSettings')
 const addProvider = require('./providers/add_provider/addProvider')
+const findProvider = require('./providers/find_provider/findProvider')
 
 const providers = async (interaction) => {
     const findButton = new MessageButton()

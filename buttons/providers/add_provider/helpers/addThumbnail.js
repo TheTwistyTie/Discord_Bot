@@ -4,7 +4,7 @@ const addThumbnail = async (interaction, embedInfo) => {
     const { channel } = interaction;
 
     const mainMsg = await interaction.reply({
-        content: 'What is the url of the image you want your resource to have?',
+        content: 'What is the url of the image you want your to have?',
         fetchReply: true,
     })
 
@@ -21,12 +21,12 @@ const addThumbnail = async (interaction, embedInfo) => {
         let url;
         if(urlMsg.attachments.size == 0) {
 
-            url = urlMsg.content;
+        url = urlMsg.content;
 
         } else {
-
+            console.log('User sent image.')
             url = urlMsg.attachments.first().url;
-            
+            console.log(url)
         }
 
         const row = new MessageActionRow()
@@ -70,8 +70,8 @@ const addThumbnail = async (interaction, embedInfo) => {
                 })
             }
 
-            const createResource = require("./createResource");
-            createResource(embedInfo.resourceType, btnInt, embedInfo.Guild, embedInfo);
+            const createProvider = require("./createProvider");
+            createProvider(embedInfo.Name, btnInt, embedInfo.Guild, embedInfo);
         })
     })
 }

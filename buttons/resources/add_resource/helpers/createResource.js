@@ -17,15 +17,8 @@ const addThumbnail = require("./addThumbnail");
 let preview;
 let btnCollector;
 
-const createResource = async (resourceType, interaction, guild, oldEmbedInfo) => {
-    const color = await colorCheck(resourceType, guild.id)
-
-    let embedInfo
-    if(!oldEmbedInfo){
-        embedInfo = new EmbedInfo(resourceType, color, guild);
-    } else {
-        embedInfo = oldEmbedInfo;
-    }
+const createResource = async (resourceType, interaction, embedInfo) => {
+    const color = await colorCheck(resourceType, embedInfo.Guild.id)
     
     const rows = getComponents(embedInfo)
     preview = await interaction.reply({
@@ -189,7 +182,7 @@ const getComponents = (embedInfo) => {
     let thumbnailButton;
     if(!embedInfo.HasThumbnail()) {
         thumbnailButton = new MessageButton()
-            .setLabel('Add a thumbnail')
+            .setLabel('Add a logo.')
             .setCustomId('add_thumbnail')
             .setStyle('SECONDARY')
     } else {

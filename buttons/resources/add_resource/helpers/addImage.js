@@ -18,7 +18,16 @@ const addImage = async (interaction, embedInfo) => {
     })
 
     urlCollector.on('collect', async urlMsg => {
-        let url = urlMsg.content;
+        let url;
+        if(urlMsg.attachments.size == 0) {
+
+            url = urlMsg.content;
+
+        } else {
+
+            url = urlMsg.attachments.first().url;
+            
+        }
 
         const row = new MessageActionRow()
             .addComponents(

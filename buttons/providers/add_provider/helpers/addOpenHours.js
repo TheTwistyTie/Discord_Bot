@@ -1,10 +1,13 @@
+
 const {MessageActionRow, MessageButton} = require("discord.js");
 
-const addThumbnail = async (interaction, embedInfo) => {
+const itemTitle = 'Open:'
+
+const addOpenHours = async (interaction, embedInfo) => {
     const { channel } = interaction;
 
     const mainMsg = await interaction.reply({
-        content: 'What is the url of the image you want your resource to have?',
+        content: 'When is this provider open?\n\t*Press (Shift + Enter) for a new line.\n\tPress (Enter) to submit.*',
         fetchReply: true,
     })
 
@@ -12,23 +15,14 @@ const addThumbnail = async (interaction, embedInfo) => {
         return m.author.id === interaction.user.id
     }
 
-    const urlCollector = channel.createMessageCollector({
+    const hoursCollector = channel.createMessageCollector({
         filter,
         max: 1,
     })
 
-    urlCollector.on('collect', async urlMsg => {
-        let url;
-        if(urlMsg.attachments.size == 0) {
-
-            url = urlMsg.content;
-
-        } else {
-
-            url = urlMsg.attachments.first().url;
-            
-        }
-
+    hoursCollector.on('collect', async hoursInt => {
+        const hours = hoursInt.content;
+        
         const row = new MessageActionRow()
             .addComponents(
                 new MessageButton()
@@ -46,7 +40,7 @@ const addThumbnail = async (interaction, embedInfo) => {
         }
 
         const btnMsg = await interaction.editReply({
-            content: `Image URL: \'**${url}**\'`,
+            content: `${itemTitle} \n\'**${hours}**\'`,
             components: [row],
             fetchReply: true,
         })
@@ -62,7 +56,7 @@ const addThumbnail = async (interaction, embedInfo) => {
                     content: 'Confimed',
                     components: [],
                 })
-                embedInfo.setThumbnail(url)
+                embedInfo.addOpenHours(hours)
             } else {
                 interaction.editReply({
                     content: 'Canceled',
@@ -70,10 +64,10 @@ const addThumbnail = async (interaction, embedInfo) => {
                 })
             }
 
-            const createResource = require("./createResource");
-            createResource(embedInfo.resourceType, btnInt, embedInfo.Guild, embedInfo);
+            const createProvider = require("./createProvider");
+            createProvider(embedInfo.Name, btnInt, embedInfo.Guild, embedInfo);
         })
     })
 }
 
-module.exports = addThumbnail;
+module.exports = addOpenHours;

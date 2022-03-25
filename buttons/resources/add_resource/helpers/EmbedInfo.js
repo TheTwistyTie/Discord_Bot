@@ -31,6 +31,7 @@ class EmbedInfo {
     #url;
     #regionText;
     #regionArray = [];
+    #providerName;
 
     #OpenHours = {
         name: 'Open:',
@@ -202,7 +203,7 @@ class EmbedInfo {
         this.#regionArray = Regions;
 
         this.#regionText = 'Regions: '
-        for(i = 0; i < Regions.length - 1; i++) {
+        for(let i = 0; i < Regions.length - 1; i++) {
             this.#regionText += Regions[i] + ', '
         }
         this.#regionText += Regions[Regions.length - 1]
@@ -300,6 +301,42 @@ class EmbedInfo {
         this.#editing = true;
         this.inline = embedData.number.inline
         this.#index = index
+    }
+
+    addProviderData(providerData) {
+        this.#providerName = providerData['title']
+
+        if(typeof providerData['thumbnail'] !== 'undefined') {
+            this.setThumbnail(providerData['thumbnail'])
+        }
+
+        if(typeof providerData['url'] !== 'undefined') {
+            this.setUrl(providerData['url'])
+        }
+
+        if(typeof providerData['hours'] !== 'undefined') {
+            this.addOpenHours(providerData['hours'])
+        }
+
+        if(typeof providerData['languages'] !== 'undefined') {
+            this.addLanguages(providerData['languages'])
+        }
+
+        if(typeof providerData['address'] !== 'undefined') {
+            this.addAddress(providerData['address'])
+        }
+
+        if(typeof providerData['email'] !== 'undefined') {
+            this.addEmail(providerData['email'])
+        }
+
+        if(typeof providerData['number'] !== 'undefined') {
+            this.addPhoneNumber(providerData['number'])
+        }
+
+        if(typeof providerData['regions'] !== 'undefined') {
+            this.addRegions(providerData['regions'])
+        }
     }
 }
 

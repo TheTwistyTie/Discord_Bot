@@ -1,12 +1,25 @@
 const buildEmbed = require('./buildEmbed');
 const buildPreviewEmbed = require('./buildPreviewEmbed');
+const submitProvider = require('./submitProvider');
+
+const Resources = require('../../../../models/ResourceSettings');
 
 class EmbedInfo {
-    constructor(providerName) {
+    constructor(providerName, Guild) {
         this.#providerName = providerName
+        this.#guild = Guild
+    }
+
+    #guild
+    get Guild () {
+        return this.#guild
     }
 
     #providerName;
+    get Name () {
+        return this.#providerName
+    }
+
     #description = 'Default Description.';
     get Description () {
         return this.#description
@@ -62,7 +75,7 @@ class EmbedInfo {
         this.#regionArray = Regions;
 
         this.#regionText = 'Regions: '
-        for(i = 0; i < Regions.length - 1; i++) {
+        for(let i = 0; i < Regions.length - 1; i++) {
             this.#regionText += Regions[i] + ', '
         }
         this.#regionText += Regions[Regions.length - 1]
@@ -171,13 +184,42 @@ class EmbedInfo {
         return fields
     }
 
+    inline = false;
     toggleInline() {
-        this.inLine = !this.inLine
+        this.inline = !this.inline
 
-        this.#Number.inline = this.inLine
-        this.#Email.inline = this.inLine
-        this.#Address.inline = this.inLine
-        this.#Languages.inline = this.inLine
+        this.#Number.inline = this.inline
+        this.#Email.inline = this.inline
+        this.#Address.inline = this.inline
+        this.#Languages.inline = this.inline
+    }
+
+    async submit(interaction) {
+        const fields = this.GetFields()
+
+        if(!this.HasRegions()) {
+            let resources = await Resources.findOne({guild_id: this.#guild.id});
+            this.addRegions(resources.regions)
+        }
+
+        const embedData = {
+            title: this.#providerName,
+            description: this.#description,
+            //color: this.#color,
+            thumbnail: this.#thumbnail,
+            url: this.#url,
+            fields: fields,
+            hours: this.#OpenHours,
+            languages: this.#Languages,
+            address: this.#Address,
+            email: this.#Email,
+            number: this.#Number,
+            regions: this.#regionArray,
+            regionText: this.#regionText,
+            timestamp: new Date(),
+        }
+
+        submitProvider(embedData, buildEmbed(embedData), buildPreviewEmbed(embedData), interaction, this.#guild.id)
     }
 }
 
