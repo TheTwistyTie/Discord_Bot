@@ -61,7 +61,7 @@ class PageHandler {
     }
 
     show() {
-        for(i = 0; i < this.messageIndexs.length; i++) {
+        for(let i = 0; i < this.messageIndexs.length; i++) {
             this.#items[this.messageIndexs[i]].addMessage(this.#channel, this.#userId);
         }
     }
@@ -147,12 +147,15 @@ class PageHandler {
                     case 'prev_page':
 
                         this.currentPage--
+
                         this.clear(this.messageIndexs)
                         
                         for(i = 0; i < this.pageSize; i++) {
                             this.messageIndexs.push(((this.currentPage - 1) * this.pageSize) + i)
                         }
+
                         this.show()
+
                         break;
                 }
 

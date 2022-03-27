@@ -88,7 +88,7 @@ const typeOfResource = async (interaction, guild, providerData) => {
         resources.save(err => {
             if(err) {
                 console.log(err);
-                interaction.reply({
+                interaction.user.send({
                     content: 'An Issue has occured.',
                 }).then(() => {
                     setTimeout( async () => {
@@ -159,7 +159,6 @@ const typeOfResource = async (interaction, guild, providerData) => {
             if(typeof providerData !== 'undefinded') {
                 embedData.addProviderData(providerData)
             }
-
             createResource(value, btnInteraction, embedData)
         }
 

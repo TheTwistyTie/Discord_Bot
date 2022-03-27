@@ -4,7 +4,7 @@ const Providers = require('../../../models/Providers');
 const PageHandler = require('./helpers/PageHandler');
 const ResourceObject = require('./helpers/ResourceObject');
 
-module.exports = async (interaction) => {
+const findProvider = async (interaction) => {
     //Enter Command Here
     const { guild } = interaction
 
@@ -14,7 +14,7 @@ module.exports = async (interaction) => {
 
     let providerList = []
     for(i = 0; i < providers.length; i++) {
-        providerList.push(new ResourceObject(providers[i].data, i))
+        providerList.push(new ResourceObject(providers[i], i, guild))
     }
 
     let regionResourcesNum = [];
@@ -98,3 +98,5 @@ module.exports = async (interaction) => {
         })
     })
 }
+
+module.exports = findProvider

@@ -1,5 +1,6 @@
 const {MessageActionRow, MessageButton} = require("discord.js");
 const Resource = require("../../../../models/Resource");
+const Providers = require("../../../../models/Providers");
 const Resources = require('../../../../models/ResourceSettings');
 
 const submitResource = async (embedInfoData, builtEmbed, previewEmbed, interaction, guildId) => {
@@ -50,6 +51,35 @@ const submitResource = async (embedInfoData, builtEmbed, previewEmbed, interacti
                 }
             })
 
+            if(typeof embedInfoData.providerName !== 'undefined') {
+                let providers = await Providers.find({
+                    guild_id: guildId,
+                });
+
+                let providerEntry;
+
+                providers.forEach(provider => {
+                    if(provider.data.embedData.title == embedInfoData.providerName) {
+                        providerEntry = provider;
+                    }
+                })
+
+                providerEntry.resources.push({
+                    title: embedInfoData.title,
+                    type: embedInfoData.resourceType
+                })
+
+                providerEntry.save(err => {
+                    if(err) {
+                        console.log(err);
+                    } else {
+                        console.log('save successful')
+                    }
+                })
+
+                console.log(providerEntry.resources)
+            }
+            
             resource.save(err => {
                 if(err) {
                     console.log(err);

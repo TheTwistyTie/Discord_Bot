@@ -1,4 +1,3 @@
-const {SlashCommandBuilder} = require('@discordjs/builders')
 const UserData = require('../../../models/User');
 const Resources = require('../../../models/Resource');
 const PageHandler = require('../find_resource/helpers/PageHandler')
@@ -13,6 +12,7 @@ const savedResource = async (interaction) => {
             id: userId,
             name: btn.user.name,
             savedResources: [],
+            savedProviders: [],
         })
     }
 
@@ -22,13 +22,13 @@ const savedResource = async (interaction) => {
     let savedResourceTitles = []
 
     for(i = 0; i < userData.savedResources.length; i++) {
-        savedResourceTitles[userData.savedResources[i]] = true;
+        savedResourceTitles[userData.savedResources[i].title] = true;
     }
 
     let savedResources = []
     for(i = 0; i < resources.length; i++) {
         if(savedResourceTitles[resources[i].data.embedData.title]) {
-            savedResources.push(new ResourceObject(resources[i].data))
+            savedResources.push(new ResourceObject(resources[i].data, i, channel.guild))
         }
     }
 

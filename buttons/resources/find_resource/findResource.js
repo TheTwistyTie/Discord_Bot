@@ -14,7 +14,7 @@ module.exports = async (interaction) => {
 
     let resourceList = []
     for(i = 0; i < resources.length; i++) {
-        resourceList.push(new ResourceObject(resources[i].data, i))
+        resourceList.push(new ResourceObject(resources[i].data, i, guild))
     }
 
     let regionResourcesNum = [];
@@ -61,7 +61,7 @@ module.exports = async (interaction) => {
                 .setCustomId('resource_filter')
                 .setPlaceholder('What kind of resources are you looking for?')
                 .setOptions(typeOptions)
-                .setMinValues(1)
+                .setMaxValues(typeOptions.length)
         )
 
     const regionOfResourceRow = new MessageActionRow()
@@ -70,7 +70,7 @@ module.exports = async (interaction) => {
                 .setCustomId('region_filter')
                 .setPlaceholder('What region are you looking for resources in?')
                 .setOptions(regionOptions)
-                .setMinValues(1)
+                .setMaxValues(regionOptions.length)
         )
 
     const filterResourceMsg = await interaction.user.send({
@@ -82,9 +82,9 @@ module.exports = async (interaction) => {
         fetchReply: true,
     })
 
+    let pageHandler = new PageHandler(resourceList, filterResourceMsg.channel, interaction.user.id)
     const updateListListener = filterResourceMsg.createMessageComponentCollector()
 
-    let pageHandler = new PageHandler(resourceList, filterResourceMsg.channel, interaction.user.id)
     let resourceFilter = [];
     let regionFilter = [];
     updateListListener.on('collect', (filterUpdate) => {
@@ -103,6 +103,9 @@ module.exports = async (interaction) => {
                 })
                 break;
         }
+
+        console.log("Find Resource randomly needed console call #1")
+        console.log("Find Resource randomly needed console call #2")
 
         if(resourceFilter.length == 0) {
             if(regionFilter.length == 0) {

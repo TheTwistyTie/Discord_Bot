@@ -3,17 +3,27 @@ const buildPreviewEmbed = require("../../add_resource/helpers/buildPreviewEmbed"
 const createResource = require("../../add_resource/helpers/createResource");
 const EmbedInfo = require('../../add_resource/helpers/EmbedInfo')
 const UserData = require('../../../../models/User');
+const GuildSettings = require('../../../../models/GuildSettings');
+const Providers = require('../../../../models/Providers');
 
 class ResourceObject {
+    #userData
+    #index
+    #guild
+
     embedData
     #fullEmbed
     #previewEmbed
-    #userData
-    #index
+    #saved = false;
 
-    constructor (embedObject, index) {
+    #providerEmbed
+    #providerName
+    #providerSaved
+
+    constructor (embedObject, index, guild) {
         this.embedData = embedObject.embedData
         this.#index = index;
+        this.#guild = guild
 
         if(typeof this.embedData.previewEmbed === 'undefined') {
             this.#previewEmbed = buildPreviewEmbed(embedObject.embedData)
@@ -26,6 +36,7 @@ class ResourceObject {
 
     message;
     showingFullEmbed = false;
+    showingProviderEmbed = false;
     async addMessage (channel, userId) {
         if(!this.#userData) {
             this.#userData = await UserData.findOne({id: userId})
@@ -54,19 +65,28 @@ class ResourceObject {
 
         const row = new MessageActionRow()
             .addComponents(
+                saveButton,
                 new MessageButton()
                     .setLabel('See More:')
                     .setCustomId('toggle_view')
                     .setStyle('PRIMARY'),
-                saveButton,
-            )
+            )        
 
-        if(true /* Test for role here */) {
+        if(await canAddNew(this.#guild, userId)) {
             row.addComponents(
                 new MessageButton()
                     .setLabel('Edit Resource')
                     .setCustomId('edit')
                     .setStyle('DANGER')
+            )
+        }
+
+        if(typeof this.embedData.providerName !== 'undefined') {
+            row.addComponents(
+                new MessageButton()
+                    .setLabel('See Provider')
+                    .setCustomId('viewProvider')
+                    .setStyle('PRIMARY')
             )
         }
 
@@ -97,17 +117,34 @@ class ResourceObject {
                     this.interactionReply(btn)
                     break;
                 case 'save' :
-                    if(this.#saved) {
-                        const index = this.#userData.savedResources.indexOf(this.embedData.title);
-                        this.#userData.savedResources.splice(index, 1);
-                    } else {
-                        if(typeof this.#userData.savedResources === 'undefined') {
-                            this.#userData.savedResources = []
+                    if(this.showingProviderEmbed) {
+                        if(this.#providerSaved) {
+                            const index = this.#userData.savedProviders.indexOf(this.#providerName);
+                            this.#userData.savedProviders.splice(index, 1);
+                        } else {
+                            if(typeof this.#userData.savedProviders == 'undefined') {
+                                this.#userData.savedProviders = []
+                            }
+                            this.#userData.savedProviders.push(this.#providerName)
                         }
-                        this.#userData.savedResources.push(this.embedData.title)
-                    }
 
-                    this.#saved = !this.#saved
+                        this.#providerSaved = !this.#providerSaved
+                    } else {
+                        if(this.#saved) {
+                            const index = this.#userData.savedResources.indexOf(this.embedData.title);
+                            this.#userData.savedResources.splice(index, 1);
+                        } else {
+                            if(typeof this.#userData.savedResources === 'undefined') {
+                                this.#userData.savedResources = []
+                            }
+                            this.#userData.savedResources.push({
+                                title: this.embedData.title,
+                                type: this.embedData.resourceType
+                            })
+                        }
+
+                        this.#saved = !this.#saved
+                    }
 
                     this.#userData.save(err => {
                         if(err) {
@@ -123,53 +160,122 @@ class ResourceObject {
                     embedDataObj.setData(this.embedData, this.#index)
                     createResource(this.embedData.resourceType, btn, embedDataObj.Guild, embedDataObj)
                     break;
+                case 'viewProvider' :
+                    this.showingProviderEmbed = !this.showingProviderEmbed;
+
+                    if(this.showingProviderEmbed) {
+                        if(typeof this.#providerEmbed == 'undefined') {
+                        
+                            let providers = await Providers.find({guild_id: this.#guild.id})
+                            let providerEntry;
+
+                            providers.forEach(provider => {
+                                if(provider.data.embedData.title == this.embedData.providerName) {
+                                    providerEntry = provider
+                                }
+                            })
+
+                            this.#providerEmbed = providerEntry.data.fullEmbed
+                            this.#providerName = providerEntry.data.embedData.title
+
+                            let savedProviders = this.#userData.savedProviders
+                            for(let i = 0; i < savedProviders.length; i++) {
+                                if(savedProviders[i] == this.#providerName) {
+                                    this.#providerSaved = true;
+                                }
+                            }
+                        }
+                    }
+
+                    this.refreshMessage()
+                    this.interactionReply(btn)
+                    break;
             }
         })
     }
 
-    refreshMessage() {
-        let saveButton;
-        if(this.#saved){
-            saveButton = new MessageButton()
-                .setLabel('Saved')
-                .setCustomId('save')
-                .setStyle('SECONDARY')
-        } else {
-            saveButton = new MessageButton()
-                .setLabel('Save')
-                .setCustomId('save')
-                .setStyle('PRIMARY')
-        }
-
-        let viewToggleButton
+    async refreshMessage() {
         let embedArray = []
-        if(this.showingFullEmbed) {
-            embedArray.push(this.#fullEmbed)
-            viewToggleButton = new MessageButton()
-                .setLabel('See Less:')
-                .setCustomId('toggle_view')
-                .setStyle('PRIMARY')
-        } else {
-            embedArray.push(this.#previewEmbed)
-            viewToggleButton = new MessageButton()
-                .setLabel('See More:')
-                .setCustomId('toggle_view')
-                .setStyle('PRIMARY')
-        }
 
         const newRow = new MessageActionRow()
-            .addComponents(
-                viewToggleButton,
-                saveButton
-            )
 
-        if(true /* Test for role here */) {
+        if(!this.showingProviderEmbed) {
+            if(this.#saved){
+                newRow.addComponents( 
+                    new MessageButton()
+                        .setLabel('Saved')
+                        .setCustomId('save')
+                        .setStyle('SECONDARY')
+                )
+            } else {
+                newRow.addComponents( 
+                    new MessageButton()
+                        .setLabel('Save')
+                        .setCustomId('save')
+                        .setStyle('PRIMARY')
+                )
+            }
+
+            if(this.showingFullEmbed) {
+                embedArray.push(this.#fullEmbed)
+                newRow.addComponents(
+                    new MessageButton()
+                        .setLabel('See Less:')
+                        .setCustomId('toggle_view')
+                        .setStyle('PRIMARY')
+                )
+            } else {
+                embedArray.push(this.#previewEmbed)
+                newRow.addComponents(
+                    new MessageButton()
+                        .setLabel('See More:')
+                        .setCustomId('toggle_view')
+                        .setStyle('PRIMARY')
+                )
+            }
+
+            if(await canAddNew(this.#guild, this.#userData.id)) {
+                newRow.addComponents(
+                    new MessageButton()
+                        .setLabel('Edit Resource')
+                        .setCustomId('edit')
+                        .setStyle('DANGER')
+                )
+            }
+
+            if(typeof this.embedData.providerName !== 'undefined') {
+                newRow.addComponents(
+                    new MessageButton()
+                        .setLabel('Show Provider')
+                        .setCustomId('viewProvider')
+                        .setStyle('PRIMARY')
+                )
+            }
+        } else {
+            embedArray.push(this.#providerEmbed)
+
+            if(this.#providerSaved){
+                newRow.addComponents( 
+                    new MessageButton()
+                        .setLabel('Saved')
+                        .setCustomId('save')
+                        .setStyle('SECONDARY')
+                )
+            } else {
+                newRow.addComponents( 
+                    new MessageButton()
+                        .setLabel('Save')
+                        .setCustomId('save')
+                        .setStyle('PRIMARY')
+                )
+            }
+
             newRow.addComponents(
                 new MessageButton()
-                    .setLabel('Edit Resource')
-                    .setCustomId('edit')
-                    .setStyle('DANGER')
-            )
+                    .setLabel('Hide Provider')
+                    .setCustomId('viewProvider')
+                    .setStyle('PRIMARY')
+                )
         }
 
         this.message.edit({
@@ -197,19 +303,40 @@ class ResourceObject {
         return this.embedData.title
     }
 
-    #saved = false;
     isSaved(saveData) {
         if(typeof saveData === 'undefined') {
             return false
         }
 
         for(i = 0; i < saveData.length; i++){
-            if(saveData[i] == this.embedData.title) {
+            if(saveData[i].title == this.embedData.title) {
                 this.#saved = true
             }
         }
         return this.#saved
     }
+}
+
+const canAddNew = async (guild, userID) => {
+
+    const guildSettings = await GuildSettings.findOne({guild_id: guild.id})
+    const approvedRoles = guildSettings.resourceAdder
+    if(!approvedRoles) {
+        console.log('Failed to find roles apporved to add resources.')
+        return false
+    }
+
+    let i = 0;
+    let canAdd = false;
+    let member = guild.members.cache.get(userID)
+    while(!canAdd && i < approvedRoles.length) {
+        if(member.roles.cache.has(approvedRoles[i])) {
+            canAdd = true;
+        }
+        i++;
+    }
+    
+    return canAdd
 }
 
 module.exports = ResourceObject;

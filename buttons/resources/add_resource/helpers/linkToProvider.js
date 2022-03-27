@@ -1,6 +1,6 @@
 const Providers = require('../../../../models/Providers')
 const {MessageActionRow, MessageSelectMenu, MessageButton} = require("discord.js");
-const addResource = require('../addResouce');
+const typeOfResource = require('./typeOfResource');
 const addProvider = require('../../../providers/add_provider/addProvider');
 const selectProviderInformation = require('./selectProviderInformation');
 
@@ -77,7 +77,7 @@ const linkToProvider = async (interaction, guild) => {
                         break;
                     case 'skipAdding':
                         newProviderMsg.edit('Skipping adding new provider.')
-                        addResource(noProviderInt)
+                        typeOfResource(noProviderInt, guild)
                         break;
                     case 'cancel':
                         newProviderMsg.edit('Canceled.')

@@ -18,7 +18,7 @@ let preview;
 let btnCollector;
 
 const createResource = async (resourceType, interaction, embedInfo) => {
-    const color = await colorCheck(resourceType, embedInfo.Guild.id)
+    //const color = await colorCheck(resourceType, embedInfo.Guild.id)
     
     const rows = getComponents(embedInfo)
     preview = await interaction.reply({
@@ -109,7 +109,7 @@ const createResource = async (resourceType, interaction, embedInfo) => {
                 case 'toggle_inline':
                     contentText = 'Toggling Inline...'
                     embedInfo.toggleInline();
-                    createResource(embedInfo.ResourceType, btnInt, embedInfo.Guild, embedInfo)
+                    createResource(embedInfo.ResourceType, btnInt, embedInfo)
             }
             interaction.editReply({
                 content: contentText,
@@ -187,7 +187,7 @@ const getComponents = (embedInfo) => {
             .setStyle('SECONDARY')
     } else {
         thumbnailButton = new MessageButton()
-            .setLabel('Change the thumbnail')
+            .setLabel('Change the logo')
             .setCustomId('add_thumbnail')
             .setStyle('SECONDARY')
     }

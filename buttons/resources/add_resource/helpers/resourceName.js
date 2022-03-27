@@ -63,7 +63,7 @@ const resourseName = async (interaction, embedInfo) => {
             }
 
             const createResource = require("./createResource");
-            createResource(embedInfo.resourceType, btnInt, embedInfo.Guild, embedInfo);
+            createResource(embedInfo.resourceType, btnInt, embedInfo);
         })
     })
 }

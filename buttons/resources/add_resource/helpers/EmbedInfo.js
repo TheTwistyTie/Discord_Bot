@@ -272,6 +272,10 @@ class EmbedInfo {
             timestamp: new Date(),
         }
 
+        if(typeof this.#providerName !== 'undefined') {
+            embedData.providerName = this.#providerName;
+        }
+
         if(!this.#editing) {
             submitResource(embedData, buildEmbed(embedData), buildPreviewEmbed(embedData), interaction, this.#guild.id)
         } else {

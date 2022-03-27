@@ -91,7 +91,7 @@ const addNewLanguage = async (interaction, languages, embedInfo) => {
                 }
 
                 const createResource = require('./createResource');
-                createResource(embedInfo.resourceTypes, btnInt, embedInfo.Guild, embedInfo)
+                createResource(embedInfo.resourceTypes, btnInt, embedInfo)
             })
         })
     })
