@@ -1,10 +1,14 @@
 const {MessageActionRow, MessageButton} = require("discord.js");
 const buildPreviewEmbed = require("../../add_resource/helpers/buildPreviewEmbed");
+const buildEmbed = require("../../add_resource/helpers/buildEmbed");
+const buildProviderEmbed = require('../../../providers/add_provider/helpers/buildEmbed')
 const createResource = require("../../add_resource/helpers/createResource");
 const EmbedInfo = require('../../add_resource/helpers/EmbedInfo')
 const UserData = require('../../../../models/User');
 const GuildSettings = require('../../../../models/GuildSettings');
 const Providers = require('../../../../models/Providers');
+const rateResource = require("./rateResource");
+const seeRatings = require("./seeRatings");
 
 class ResourceObject {
     #userData
@@ -14,6 +18,7 @@ class ResourceObject {
     embedData
     #fullEmbed
     #previewEmbed
+    #ratings
     #saved = false;
 
     #providerEmbed
@@ -21,17 +26,14 @@ class ResourceObject {
     #providerSaved
 
     constructor (embedObject, index, guild) {
-        this.embedData = embedObject.embedData
+        this.embedData = embedObject.data
         this.#index = index;
         this.#guild = guild
 
-        if(typeof this.embedData.previewEmbed === 'undefined') {
-            this.#previewEmbed = buildPreviewEmbed(embedObject.embedData)
-        } else {
-            this.#previewEmbed = embedObject.previewEmbed
-        } 
+        this.#previewEmbed = buildPreviewEmbed(embedObject.data)
+        this.#fullEmbed = buildEmbed(embedObject.data)
 
-        this.#fullEmbed = embedObject.fullEmbed;
+        this.#ratings = embedObject.ratings;
     }
 
     message;
@@ -70,22 +72,29 @@ class ResourceObject {
                     .setLabel('See More:')
                     .setCustomId('toggle_view')
                     .setStyle('PRIMARY'),
-            )        
-
-        if(await canAddNew(this.#guild, userId)) {
-            row.addComponents(
-                new MessageButton()
-                    .setLabel('Edit Resource')
-                    .setCustomId('edit')
-                    .setStyle('DANGER')
             )
-        }
 
         if(typeof this.embedData.providerName !== 'undefined') {
             row.addComponents(
                 new MessageButton()
                     .setLabel('See Provider')
                     .setCustomId('viewProvider')
+                    .setStyle('PRIMARY')
+            )
+        }
+
+        row.addComponents(
+            new MessageButton()
+                .setLabel('Rate Resource')
+                .setCustomId('rateResource')
+                .setStyle('SUCCESS')
+        )
+        
+        if(this.#ratings.length >= 1) {
+            row.addComponents(
+                new MessageButton()
+                    .setLabel('See Reviews')
+                    .setCustomId('seeRatings')
                     .setStyle('PRIMARY')
             )
         }
@@ -105,8 +114,8 @@ class ResourceObject {
             filter,
         })
 
-        btnCollector.on('collect', async (btn) => {
-            switch (btn.customId) {
+        btnCollector.on('collect', async (btnInteraction) => {
+            switch (btnInteraction.customId) {
                 case 'toggle_view':
                     if(!this.showingFullEmbed) {
                         this.showingFullEmbed = true;
@@ -114,7 +123,7 @@ class ResourceObject {
                         this.showingFullEmbed = false;
                     }
                     this.refreshMessage()
-                    this.interactionReply(btn)
+                    this.interactionReply(btnInteraction)
                     break;
                 case 'save' :
                     if(this.showingProviderEmbed) {
@@ -153,12 +162,12 @@ class ResourceObject {
                         }
                     })
                     this.refreshMessage()
-                    this.interactionReply(btn)
+                    this.interactionReply(btnInteraction)
                     break;
                 case 'edit' :
                     let embedDataObj = new EmbedInfo()
                     embedDataObj.setData(this.embedData, this.#index)
-                    createResource(this.embedData.resourceType, btn, embedDataObj.Guild, embedDataObj)
+                    createResource(this.embedData.resourceType, btnInteraction, embedDataObj.Guild, embedDataObj)
                     break;
                 case 'viewProvider' :
                     this.showingProviderEmbed = !this.showingProviderEmbed;
@@ -170,13 +179,13 @@ class ResourceObject {
                             let providerEntry;
 
                             providers.forEach(provider => {
-                                if(provider.data.embedData.title == this.embedData.providerName) {
+                                if(provider.data.title == this.embedData.providerName) {
                                     providerEntry = provider
                                 }
                             })
 
-                            this.#providerEmbed = providerEntry.data.fullEmbed
-                            this.#providerName = providerEntry.data.embedData.title
+                            this.#providerEmbed = buildProviderEmbed(providerEntry.data)
+                            this.#providerName = providerEntry.data.title
 
                             let savedProviders = this.#userData.savedProviders
                             for(let i = 0; i < savedProviders.length; i++) {
@@ -188,11 +197,23 @@ class ResourceObject {
                     }
 
                     this.refreshMessage()
-                    this.interactionReply(btn)
+                    this.interactionReply(btnInteraction)
+                    break;
+                case 'rateResource' :
+                    rateResource(btnInteraction, this.embedData, this.#guild)
+                    break;
+                case 'seeRatings' :
+                    seeRatings(btnInteraction, this.#ratings)
                     break;
             }
         })
     }
+
+    /*
+        this message has
+        base: 5 buttons
+        see more: 5 buttons
+    */
 
     async refreshMessage() {
         let embedArray = []
@@ -224,6 +245,15 @@ class ResourceObject {
                         .setCustomId('toggle_view')
                         .setStyle('PRIMARY')
                 )
+
+                if(await canAddNew(this.#guild, this.#userData.id)) {
+                    newRow.addComponents(
+                        new MessageButton()
+                            .setLabel('Edit Resource')
+                            .setCustomId('edit')
+                            .setStyle('DANGER')
+                    )
+                }
             } else {
                 embedArray.push(this.#previewEmbed)
                 newRow.addComponents(
@@ -232,14 +262,12 @@ class ResourceObject {
                         .setCustomId('toggle_view')
                         .setStyle('PRIMARY')
                 )
-            }
 
-            if(await canAddNew(this.#guild, this.#userData.id)) {
                 newRow.addComponents(
                     new MessageButton()
-                        .setLabel('Edit Resource')
-                        .setCustomId('edit')
-                        .setStyle('DANGER')
+                        .setLabel('Rate Resource')
+                        .setCustomId('rateResource')
+                        .setStyle('SUCCESS')
                 )
             }
 
@@ -251,6 +279,17 @@ class ResourceObject {
                         .setStyle('PRIMARY')
                 )
             }
+
+            if(this.#ratings.length >= 1) {
+                newRow.addComponents(
+                    new MessageButton()
+                        .setLabel('See Reviews')
+                        .setCustomId('seeRatings')
+                        .setStyle('PRIMARY')
+                )
+            }
+
+            
         } else {
             embedArray.push(this.#providerEmbed)
 

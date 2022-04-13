@@ -4,6 +4,8 @@ const Providers = require('../../../models/Providers');
 const PageHandler = require('./helpers/PageHandler');
 const ResourceObject = require('./helpers/ResourceObject');
 
+let pageHandler
+let filterProviderMsg
 const findProvider = async (interaction) => {
     //Enter Command Here
     const { guild } = interaction
@@ -49,7 +51,7 @@ const findProvider = async (interaction) => {
                 .setMinValues(1)
         )
 
-    const filterProviderMsg = await interaction.user.send({
+    filterProviderMsg = await interaction.user.send({
         content: 'Provider Finder:',
         components: [
             regionOfProviderRow,
@@ -59,11 +61,13 @@ const findProvider = async (interaction) => {
 
     const updateListListener = filterProviderMsg.createMessageComponentCollector()
 
-    let pageHandler = new PageHandler(providerList, filterProviderMsg.channel, interaction.user.id)
+    pageHandler = new PageHandler(providerList, filterProviderMsg.channel, interaction.user.id)
     let regionFilter = [];
 
+    createDoneMessage(filterProviderMsg.channel)
+
     updateListListener.on('collect', (filterUpdate) => {
-        pageHandler.clear()
+        clear(false)
         switch (filterUpdate.customId) {
             case 'region_filter' :
                 regionFilter = []
@@ -90,6 +94,8 @@ const findProvider = async (interaction) => {
                 pageHandler = new PageHandler(regionFiltered, filterProviderMsg.channel, interaction.user.id)
             }
 
+            createDoneMessage(filterProviderMsg.channel)
+
         filterUpdate.reply({
             content: `Updating...`,
             fetchReply: true,
@@ -99,4 +105,43 @@ const findProvider = async (interaction) => {
     })
 }
 
+let doneMessage;
+const createDoneMessage = (channel) => {
+    let doneMessageRow = new MessageActionRow().addComponents(
+        new MessageButton()
+            .setLabel('Done.')
+            .setCustomId('done_button')
+            .setStyle('DANGER')
+    )
+
+    setTimeout(async () => {
+        doneMessage = await channel.send({
+            content: ' ',
+            components: [doneMessageRow],
+            fetchReply: true,
+        })
+
+        let msgCollector = doneMessage.createMessageComponentCollector()
+
+        msgCollector.on('collect', async (btnInt) => {
+            if(btnInt.customId == 'done_button') {
+                clear(true)
+            }
+            let looseEnd = await btnInt.reply({
+                content: 'Finished.',
+                fetchReply: true
+            })
+            looseEnd.delete()
+        })
+    }, 800)
+}
+
+const clear = (removeFilters) => {
+    if(removeFilters) {
+        filterProviderMsg.delete()
+    }
+    pageHandler.clear()
+    doneMessage.delete()
+}
+ 
 module.exports = findProvider

@@ -11,7 +11,7 @@ const linkToProvider = async (interaction, guild) => {
     let providerNames = [];
     for(let i = 0; i < providers.length; i++) {
         providerNames.push({
-            label: providers[i].data.embedData.title,
+            label: providers[i].data.title,
             value: i.toString()
         })
     }
@@ -67,7 +67,7 @@ const linkToProvider = async (interaction, guild) => {
 
             const providerQuestionCollector = newProviderMsg.createMessageComponentCollector()
 
-            providerQuestionCollector.on('collect', noProviderInt => {
+            providerQuestionCollector.on('collect', async noProviderInt => {
                 const {customId} = noProviderInt;
 
                 switch(customId) {
@@ -81,15 +81,16 @@ const linkToProvider = async (interaction, guild) => {
                         break;
                     case 'cancel':
                         newProviderMsg.edit('Canceled.')
+
+                        let looseEnd = await noProviderInt.reply({
+                            content: 'Button Clicked...',
+                            fetchReply: true
+                        })
+                
+                        looseEnd.delete()
                         break;
                 }
-
-                let looseEnd = noProviderInt.reply({
-                    content: 'Button Clicked...',
-                    fetchReply: true
-                })
-        
-                looseEnd.delete()
+                
             })
         } else {
             //When a provider is selected

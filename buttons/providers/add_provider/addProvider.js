@@ -10,6 +10,13 @@ const addProvider = async (interaction) => {
         fetchReply: true,
     })
 
+    let looseEnd = await interaction.reply({
+        content: 'Button Clicked...',
+        fetchReply: true,
+    })
+
+    looseEnd.delete()
+
     const channel = intialMessage.channel
 
     const collector = await intialMessage.channel.createMessageCollector({
@@ -37,7 +44,7 @@ const addProvider = async (interaction) => {
         })
 
         const confCollect = await confMessage.createMessageComponentCollector()
-        confCollect.on('collect', (confInt) => {
+        confCollect.on('collect', async (confInt) => {
             if(confInt.customId === 'confirm') {
                 createProvider(providerName.content, confInt, interaction.guild);
             } else {

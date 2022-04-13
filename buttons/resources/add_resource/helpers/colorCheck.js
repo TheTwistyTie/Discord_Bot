@@ -10,7 +10,7 @@ const colorCheck = async (resourceType, guild_id) => {
         }
     }
 
-    return '#ffaa55'
+    return '#808080'
 }
 
 module.exports = colorCheck

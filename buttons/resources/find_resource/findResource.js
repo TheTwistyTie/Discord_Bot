@@ -4,6 +4,8 @@ const Resources = require('../../../models/Resource');
 const PageHandler = require('./helpers/PageHandler');
 const ResourceObject = require('./helpers/ResourceObject');
 
+let pageHandler;
+let filterResourceMsg;
 module.exports = async (interaction) => {
     //Enter Command Here
     const { guild } = interaction
@@ -14,7 +16,7 @@ module.exports = async (interaction) => {
 
     let resourceList = []
     for(i = 0; i < resources.length; i++) {
-        resourceList.push(new ResourceObject(resources[i].data, i, guild))
+        resourceList.push(new ResourceObject(resources[i], i, guild))
     }
 
     let regionResourcesNum = [];
@@ -70,10 +72,10 @@ module.exports = async (interaction) => {
                 .setCustomId('region_filter')
                 .setPlaceholder('What region are you looking for resources in?')
                 .setOptions(regionOptions)
-                .setMaxValues(regionOptions.length)
+                .setMinValues(1)
         )
 
-    const filterResourceMsg = await interaction.user.send({
+    filterResourceMsg = await interaction.user.send({
         content: 'Resource Finder Filters:',
         components: [
             typeOfResourceRow,
@@ -82,13 +84,15 @@ module.exports = async (interaction) => {
         fetchReply: true,
     })
 
-    let pageHandler = new PageHandler(resourceList, filterResourceMsg.channel, interaction.user.id)
+    pageHandler = new PageHandler(resourceList, filterResourceMsg.channel, interaction.user.id)
     const updateListListener = filterResourceMsg.createMessageComponentCollector()
+
+    createDoneMessage(filterResourceMsg.channel)
 
     let resourceFilter = [];
     let regionFilter = [];
     updateListListener.on('collect', (filterUpdate) => {
-        pageHandler.clear()
+        clear(false)
         switch (filterUpdate.customId) {
             case 'resource_filter' :
                 resourceFilter = []
@@ -149,6 +153,8 @@ module.exports = async (interaction) => {
             }
         }
 
+        createDoneMessage(filterResourceMsg.channel)
+
         filterUpdate.reply({
             content: `Updating...`,
             fetchReply: true,
@@ -156,4 +162,44 @@ module.exports = async (interaction) => {
             msg.delete();
         })
     })
+
+}
+
+let doneMessage;
+const createDoneMessage = (channel) => {
+    let doneMessageRow = new MessageActionRow().addComponents(
+        new MessageButton()
+            .setLabel('Done.')
+            .setCustomId('done_button')
+            .setStyle('DANGER')
+    )
+
+    setTimeout(async () => {
+        doneMessage = await channel.send({
+            content: ' ',
+            components: [doneMessageRow],
+            fetchReply: true,
+        })
+
+        let msgCollector = doneMessage.createMessageComponentCollector()
+
+        msgCollector.on('collect', async (btnInt) => {
+            if(btnInt.customId == 'done_button') {
+                clear(true)
+            }
+            let looseEnd = await btnInt.reply({
+                content: 'Finished.',
+                fetchReply: true
+            })
+            looseEnd.delete()
+        })
+    }, 800)
+}
+
+const clear = (removeFilters) => {
+    if(removeFilters) {
+        filterResourceMsg.delete()
+    }
+    pageHandler.clear()
+    doneMessage.delete()
 }

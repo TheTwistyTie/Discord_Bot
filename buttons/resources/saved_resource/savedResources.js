@@ -27,7 +27,7 @@ const savedResource = async (interaction) => {
 
     let savedResources = []
     for(i = 0; i < resources.length; i++) {
-        if(savedResourceTitles[resources[i].data.embedData.title]) {
+        if(savedResourceTitles[resources[i].data.title]) {
             savedResources.push(new ResourceObject(resources[i].data, i, channel.guild))
         }
     }
@@ -38,6 +38,37 @@ const savedResource = async (interaction) => {
     })
 
     let pageHandler = new PageHandler(savedResources, directMessage.channel, interaction.user.id)
+
+    let doneMessageRow = new MessageActionRow().addComponents(
+        new MessageButton()
+            .setLabel('Done.')
+            .setCustomId('done_button')
+            .setStyle('DANGER')
+    )
+
+    setTimeout(async () => {
+        let doneMessage = await interaction.user.send({
+            content: ' ',
+            components: [doneMessageRow],
+            fetchReply: true,
+        })
+
+        let msgCollector = doneMessage.createMessageComponentCollector()
+
+        msgCollector.on('collect', async (btnInt) => {
+            if(btnInt.customId == 'done_button') {
+                doneMessage.delete()
+                directMessage.delete()
+                pageHandler.clear()
+            }
+
+            let looseEnd = await btnInt.reply({
+                content: 'Finished.',
+                fetchReply: true
+            })
+            looseEnd.delete()
+        })
+    }, 800)
 }
 
 module.exports = savedResource

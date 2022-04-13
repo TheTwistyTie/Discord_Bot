@@ -25,6 +25,7 @@ class EmbedInfo {
         return this.#description
     }
     
+    #color = "#808080"
     #url;
     #thumbnail;
     #regionText;
@@ -142,7 +143,7 @@ class EmbedInfo {
         const embedData = {
             title: this.#providerName,
             description: this.#description,
-            //color: this.#color,
+            color: this.#color,
             thumbnail: this.#thumbnail,
             url: this.#url,
             fields: fields,
@@ -205,7 +206,7 @@ class EmbedInfo {
         const embedData = {
             title: this.#providerName,
             description: this.#description,
-            //color: this.#color,
+            color: this.#color,
             thumbnail: this.#thumbnail,
             url: this.#url,
             fields: fields,
@@ -219,7 +220,33 @@ class EmbedInfo {
             timestamp: new Date(),
         }
 
-        submitProvider(embedData, buildEmbed(embedData), buildPreviewEmbed(embedData), interaction, this.#guild.id)
+        submitProvider(embedData, buildEmbed(embedData), buildPreviewEmbed(embedData), interaction, this.#guild.id, this.#editing, this.#index)
+    }
+
+    #editing = false;
+    #index = -1
+    setData(embedData, guild, index) {
+        this.#editing = true
+        this.#guild = guild
+        this.#index = index
+
+        if(typeof embedData.color !== 'undefined') {
+            this.#color = embedData.color
+        } else {
+            this.#color = '#808080'
+        }
+
+        this.#providerName = embedData.title
+        this.#description = embedData.description
+        this.#thumbnail = embedData.thumbnail
+        this.#url = embedData.url
+        this.#OpenHours = embedData.hours
+        this.#Languages = embedData.languages
+        this.#Address = embedData.address
+        this.#Email = embedData.email
+        this.#Number = embedData.number
+        this.#regionArray = embedData.regions
+        this.#regionText = embedData.regionText
     }
 }
 

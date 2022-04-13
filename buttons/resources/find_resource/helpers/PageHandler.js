@@ -1,6 +1,7 @@
 const { MessageActionRow, MessageButton } = require("discord.js");
 const { listIndexes } = require("../../../../models/ResourceSettings");
 const ResourceObject = require("./ResourceObject");
+const RatingObject = require('./RatingObject')
 
 class PageHandler {
     #items = []
@@ -155,7 +156,6 @@ class PageHandler {
                         }
 
                         this.show()
-
                         break;
                 }
 

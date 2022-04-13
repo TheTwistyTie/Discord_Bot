@@ -1,7 +1,7 @@
 const {MessageActionRow, MessageButton} = require("discord.js");
 const Providers = require("../../../../models/Providers");
 
-const submitProvider = async (embedInfoData, builtEmbed, previewEmbed, interaction, guildId) => {
+const submitProvider = async (embedInfoData, builtEmbed, previewEmbed, interaction, guildId, editing, index) => {
     const { channel } = interaction
 
     const row = new MessageActionRow()
@@ -40,37 +40,56 @@ const submitProvider = async (embedInfoData, builtEmbed, previewEmbed, interacti
                 embeds: [],
             })
 
-            const provider = new Providers({
-                guild_id: guildId,
-                data: {
-                    embedData: embedInfoData,
-                    fullEmbed: builtEmbed,
-                    previewEmbed: previewEmbed,
-                }
-            })
+            if(editing) {
+                let providerList = await Providers.find({guild_id: guildId});
 
-            provider.save(err => {
-                if(err) {
-                    console.log(err);
-                    interaction.reply({
-                        content: 'An Issue has occured.',
+                let provider;
+                if(typeof index !== 'undefined') {
+                    if(providerList[index].data.embedData.title == embedInfoData.title) {
+                        providerList[index].data.embedData = embedInfoData;
+                    }
+
+                    providerList[index].save(err => {
+                        if(err) {
+                            console.log(err)
+                            btnInt.reply('There was an error saving this edit. Please contact the admin.')
+                        } else {
+                            btnInt.reply('Edit saved succesfully!')
+                        }
+                    })
+                } else {
+                    console.log('Provider at index provided is not the same as the provider you are trying to make edits to. Defaulting to searching.')
+                }
+            } else {
+                const provider = new Providers({
+                    guild_id: guildId,
+                    data: embedInfoData,
+                    ratings: [],
+                    resources: [],
+                })
+
+                provider.save(err => {
+                    if(err) {
+                        console.log(err);
+                        interaction.reply({
+                            content: 'An Issue has occured.',
+                        }).then((msg) => {
+                            setTimeout( () => {
+                                msg.delete()
+                            }, 2000);
+                        });
+                        return;
+                    }
+    
+                    channel.send({
+                        content: `Added Provider.`,
                     }).then((msg) => {
                         setTimeout( () => {
                             msg.delete()
                         }, 2000);
                     });
-                    return;
-                }
-
-                channel.send({
-                    content: `Added Provider.`,
-                }).then((msg) => {
-                    setTimeout( () => {
-                        msg.delete()
-                    }, 2000);
-                });
-            })
-
+                })
+            }
         } else {
             interaction.editReply({
                 content: 'Canceled',

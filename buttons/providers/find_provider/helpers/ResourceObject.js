@@ -1,10 +1,14 @@
 const {MessageActionRow, MessageButton, MessageSelectMenu} = require("discord.js");
 const buildPreviewEmbed = require("../../add_provider/helpers/buildPreviewEmbed");
-const createResource = require("../../add_provider/helpers/createProvider");
+const createProvider = require("../../add_provider/helpers/createProvider");
 const EmbedInfo = require('../../add_provider/helpers/EmbedInfo')
 const UserData = require('../../../../models/User');
 const GuildSettings = require('../../../../models/GuildSettings')
 const Resources = require('../../../../models/Resource')
+const rateResource = require('./rateProvider');
+const buildEmbed = require("../../add_provider/helpers/buildEmbed");
+const buildResourceEmbed = require('../../../resources/add_resource/helpers/buildEmbed');
+const seeRatings = require("../../../resources/find_resource/helpers/seeRatings");
 
 class ResourceObject {
     #userData
@@ -14,27 +18,25 @@ class ResourceObject {
     #fullEmbed
     #previewEmbed
     #index
+    #ratings
 
     #resourceNameList
-
+ 
     #resourceEmbed
     #resouceSaved = false;
     #resourceName
     #resourceType
 
     constructor (embedObject, index, guild) {
-        this.embedData = embedObject.data.embedData
+        this.embedData = embedObject.data
         this.#resourceNameList = embedObject.resources
         this.#index = index;
         this.#guild = guild
 
-        if(typeof this.embedData.previewEmbed === 'undefined') {
-            this.#previewEmbed = buildPreviewEmbed(embedObject.data.embedData)
-        } else {
-            this.#previewEmbed = embedObject.data.previewEmbed
-        } 
+        this.#previewEmbed = buildPreviewEmbed(embedObject.data)
+        this.#fullEmbed = buildEmbed(embedObject.data);
 
-        this.#fullEmbed = embedObject.data.fullEmbed;
+        this.#ratings = embedObject.ratings;
     }
 
     message;
@@ -76,12 +78,19 @@ class ResourceObject {
                     .setStyle('PRIMARY'),
             )
 
-        if(canAddNew(this.#guild, this.#userData.id)) {
+        row.addComponents(
+            new MessageButton()
+                .setLabel('Rate Resource')
+                .setCustomId('rateResource')
+                .setStyle('SUCCESS')
+        )
+
+        if(this.#ratings.length >= 1) {
             row.addComponents(
                 new MessageButton()
-                    .setLabel('Edit Resource')
-                    .setCustomId('edit')
-                    .setStyle('DANGER')
+                    .setLabel('See Reviews')
+                    .setCustomId('seeRatings')
+                    .setStyle('PRIMARY')
             )
         }
 
@@ -154,7 +163,7 @@ class ResourceObject {
                     } else {
                         if(this.#saved) {
                             const index = this.#userData.savedProviders.indexOf(this.embedData.title);
-                            this.#userData.savedProvider.splice(index, 1);
+                            this.#userData.savedProviders.splice(index, 1);
                         } else {
                             if(typeof this.#userData.savedProviders === 'undefined') {
                                 this.#userData.savedProviders = []
@@ -178,8 +187,8 @@ class ResourceObject {
 
                 case 'edit' :
                     let embedDataObj = new EmbedInfo()
-                    embedDataObj.setData(this.embedData, this.#index)
-                    createResource(this.embedData.resourceType, btn, embedDataObj.Guild, embedDataObj)
+                    embedDataObj.setData(this.embedData, this.#guild, this.#index)
+                    createProvider(this.embedData.resourceType, btn, embedDataObj.Guild, embedDataObj, true)
                     break;
 
                 case 'resourceSelectMenu' :
@@ -190,18 +199,18 @@ class ResourceObject {
 
                         let resource;
                         for(let i = 0; i < resourceList.length; i++) {
-                            if(typeof resourceList[i].data.embedData.providerName !== 'undefined') {
-                                if(resourceList[i].data.embedData.providerName == this.embedData.title) {
-                                    if(resourceList[i].data.embedData.title == btn.values[0]) {
+                            if(typeof resourceList[i].data.providerName !== 'undefined') {
+                                if(resourceList[i].data.providerName == this.embedData.title) {
+                                    if(resourceList[i].data.title == btn.values[0]) {
                                         resource = resourceList[i]
                                     }
                                 }
                             }
                         }
 
-                        this.#resourceEmbed = resource.data.fullEmbed;
-                        this.#resourceName = resource.data.embedData.title;
-                        this.#resourceType = resource.data.embedData.resourceType;
+                        this.#resourceEmbed = buildResourceEmbed(resource.data);
+                        this.#resourceName = resource.data.title;
+                        this.#resourceType = resource.data.resourceType;
 
                         let savedResources = this.#userData.savedResources
                         for(let i = 0; i < savedResources.length; i++) {
@@ -229,10 +238,21 @@ class ResourceObject {
                     this.interactionReply(btn)
 
                     break;
+
+                case 'rateResource' :
+                    rateResource(btn, this.embedData, this.#guild)
+                    break;
+                case 'seeRatings' :
+                    seeRatings(btn, this.#ratings);
+                    break;
             }
         })
     }
-
+    /*
+        This message has 
+            base: 4 buttons
+            see more: 4 buttons
+    */
     refreshMessage() {
         let comps = []
         let embedArray = []
@@ -265,6 +285,15 @@ class ResourceObject {
                         .setCustomId('toggle_view')
                         .setStyle('PRIMARY')
                     )
+
+                if(canAddNew(this.#guild, this.#userData.id)) {
+                    newRow.addComponents(
+                        new MessageButton()
+                            .setLabel('Edit Provider')
+                            .setCustomId('edit')
+                            .setStyle('DANGER')
+                    )
+                }
             } else {
                 embedArray.push(this.#previewEmbed)
                 newRow.addComponents( 
@@ -275,14 +304,21 @@ class ResourceObject {
                     )
             }
 
-            if(canAddNew(this.#guild, this.#userData.id)) {
+            newRow.addComponents(
+                new MessageButton()
+                    .setLabel('Rate Provider')
+                    .setCustomId('rateResource')
+                    .setStyle('SUCCESS')
+            )
+
+            if(this.#ratings.length >= 1) {
                 newRow.addComponents(
                     new MessageButton()
-                        .setLabel('Edit Resource')
-                        .setCustomId('edit')
-                        .setStyle('DANGER')
+                        .setLabel('See Reviews')
+                        .setCustomId('seeRatings')
+                        .setStyle('PRIMARY')
                 )
-            }
+            } 
 
         } else {
             if(this.#resouceSaved) {

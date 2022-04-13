@@ -44,11 +44,8 @@ const submitResource = async (embedInfoData, builtEmbed, previewEmbed, interacti
 
             const resource = new Resource({
                 guild_id: guildId,
-                data: {
-                    embedData: embedInfoData,
-                    fullEmbed: builtEmbed,
-                    previewEmbed: previewEmbed,
-                }
+                data: embedInfoData,
+                ratings: [],
             })
 
             if(typeof embedInfoData.providerName !== 'undefined') {
@@ -59,15 +56,27 @@ const submitResource = async (embedInfoData, builtEmbed, previewEmbed, interacti
                 let providerEntry;
 
                 providers.forEach(provider => {
-                    if(provider.data.embedData.title == embedInfoData.providerName) {
+                    if(provider.data.title == embedInfoData.providerName) {
                         providerEntry = provider;
                     }
                 })
 
-                providerEntry.resources.push({
-                    title: embedInfoData.title,
-                    type: embedInfoData.resourceType
-                })
+                console.log(providerEntry)
+
+                console.log(embedInfoData.title)
+                console.log(embedInfoData.resourceType)
+
+                if(providerEntry.resources.length < 1 || typeof providerEntry.resources == 'undefined') {
+                    providerEntry.resources = [{
+                        title: embedInfoData.title,
+                        type: embedInfoData.resourceType
+                    }]
+                } else {
+                    providerEntry.resources.push({
+                        title: embedInfoData.title,
+                        type: embedInfoData.resourceType
+                    })
+                }
 
                 providerEntry.save(err => {
                     if(err) {

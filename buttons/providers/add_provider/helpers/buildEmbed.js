@@ -6,7 +6,7 @@ const buildEmbed = (embedData) => {
     let newEmbed = new MessageEmbed()
         .setTitle(title)
         .setDescription(description)
-        .setColor('#000000')
+        .setColor(color)
         .setTimestamp(timestamp)
 
     if(typeof fields !== 'undefined' && fields.length >= 1) {
@@ -29,3 +29,5 @@ const buildEmbed = (embedData) => {
 }
 
 module.exports = buildEmbed;
+
+//Left off here, trying to get the embedColor call happen more frequently to avoid issues. Might not be needed. 

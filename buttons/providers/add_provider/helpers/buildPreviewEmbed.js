@@ -6,7 +6,7 @@ const buildPreviewEmbed = (embedData) => {
     let newEmbed = new MessageEmbed()
         .setTitle(title)
         .setDescription(description)
-        .setColor('#000000')
+        .setColor(color)
     
     if(typeof thumbnail !== 'undefined'){
         newEmbed.setThumbnail(thumbnail)

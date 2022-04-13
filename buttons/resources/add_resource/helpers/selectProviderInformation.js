@@ -1,9 +1,8 @@
 const { MessageActionRow, MessageSelectMenu } = require("discord.js")
+const buildEmbed = require("../../../providers/add_provider/helpers/buildEmbed")
 const typeOfResource = require("./typeOfResource")
 
 const selectProviderInformation = async (interaction, provider, guild) => {
-    const {fullEmbed, embedData} = provider.data
-
     /*  
         data that can be transfered 
             Logo as thumbnail
@@ -28,8 +27,8 @@ const selectProviderInformation = async (interaction, provider, guild) => {
     let data = []
     let options = []
 
-    if(typeof embedData.thumbnail !== 'undefined') {
-        data['thumbnail'] = embedData.thumbnail
+    if(typeof provider.data.thumbnail !== 'undefined') {
+        data['thumbnail'] = provider.data.thumbnail
 
         options.push({
             label: 'Logo',
@@ -37,8 +36,8 @@ const selectProviderInformation = async (interaction, provider, guild) => {
         })
     }
 
-    if(typeof embedData.url !== 'undefined') {
-        data['url'] = embedData.url
+    if(typeof provider.data.url !== 'undefined') {
+        data['url'] = provider.data.url
 
         options.push({
             label: 'URL',
@@ -46,8 +45,8 @@ const selectProviderInformation = async (interaction, provider, guild) => {
         })
     }
 
-    if(typeof embedData.hours.value !== 'undefined') {
-        data['hours'] = embedData.hours.value
+    if(typeof provider.data.hours.value !== 'undefined') {
+        data['hours'] = provider.data.hours.value
 
         options.push({
             label: 'Hours',
@@ -55,8 +54,8 @@ const selectProviderInformation = async (interaction, provider, guild) => {
         })
     } 
 
-    if(typeof embedData.languages.value !== 'undefined') {
-        data['languages'] = embedData.languages.value
+    if(typeof provider.data.languages.value !== 'undefined') {
+        data['languages'] = provider.data.languages.value
 
         options.push({
             label: 'Languages',
@@ -64,8 +63,8 @@ const selectProviderInformation = async (interaction, provider, guild) => {
         })
     } 
 
-    if(typeof embedData.address.value !== 'undefined') {
-        data['address'] = embedData.address.value
+    if(typeof provider.data.address.value !== 'undefined') {
+        data['address'] = provider.data.address.value
 
         options.push({
             label: 'Address',
@@ -73,8 +72,8 @@ const selectProviderInformation = async (interaction, provider, guild) => {
         })
     } 
 
-    if(typeof embedData.email.value !== 'undefined') {
-        data['email'] = embedData.email.value
+    if(typeof provider.data.email.value !== 'undefined') {
+        data['email'] = provider.data.email.value
 
         options.push({
             label: 'Email',
@@ -82,8 +81,8 @@ const selectProviderInformation = async (interaction, provider, guild) => {
         })
     } 
 
-    if(typeof embedData.number.value !== 'undefined') {
-        data['number'] = embedData.number.value
+    if(typeof provider.data.number.value !== 'undefined') {
+        data['number'] = provider.data.number.value
 
         options.push({
             label: 'Number',
@@ -91,8 +90,8 @@ const selectProviderInformation = async (interaction, provider, guild) => {
         })
     } 
 
-    if(typeof embedData.regions !== 'undefined') {
-        data['regions'] = embedData.regions
+    if(typeof provider.data.regions !== 'undefined') {
+        data['regions'] = provider.data.regions
 
         options.push({
             label: 'Regions',
@@ -111,7 +110,7 @@ const selectProviderInformation = async (interaction, provider, guild) => {
 
     const dataMessage = await interaction.reply({
         content: 'What data would you like to link?',
-        embeds: [fullEmbed],
+        embeds: [buildEmbed(provider.data)],
         components: [row],
         fetchReply: true
     })
@@ -123,7 +122,7 @@ const selectProviderInformation = async (interaction, provider, guild) => {
 
         let dataToSend = [];
 
-        dataToSend['title'] = embedData.title;
+        dataToSend['title'] = provider.data.title;
 
         for(let i = 0; i < values.length; i++) {
             dataToSend[values[i]] = data[values[i]]
