@@ -3,7 +3,7 @@ const UserData = require('../models/User');
 const GuildSettings = require('../models/GuildSettings')
 const addResource = require("./resources/add_resource/addResouce");
 const findResource = require("./resources/find_resource/findResource");
-const savedResource = require("./resources/saved_resource/savedresources");
+const savedResource = require("./resources/saved_resource/savedResources");
 
 const resources = async (interaction) => {
     const findButton = new MessageButton()
