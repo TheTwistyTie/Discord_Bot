@@ -2,6 +2,7 @@ const UserData = require('../../../models/User');
 const Resources = require('../../../models/Resource');
 const PageHandler = require('../find_resource/helpers/PageHandler')
 const ResourceObject = require('../find_resource/helpers/ResourceObject');
+const { MessageActionRow, MessageButton } = require('discord.js');
 
 const savedResource = async (interaction) => {
     const { channel } = interaction
@@ -28,7 +29,7 @@ const savedResource = async (interaction) => {
     let savedResources = []
     for(i = 0; i < resources.length; i++) {
         if(savedResourceTitles[resources[i].data.title]) {
-            savedResources.push(new ResourceObject(resources[i].data, i, channel.guild))
+            savedResources.push(new ResourceObject(resources[i], i, channel.guild))
         }
     }
 

@@ -46,7 +46,7 @@ class ResourceObject {
             if(!this.#userData) {
                 this.#userData = new UserData({
                     id: userId,
-                    name: btn.user.name,
+                    //name: btn.user.name,
                     savedResources: [],
                 })
             }

@@ -2,6 +2,8 @@ const { MessageActionRow, MessageButton } = require('discord.js');
 const Resources = require('../../../../models/Resource');
 const buildEmbed = require('../../add_resource/helpers/buildEmbed');
 const buildPreviewEmbed = require('../../add_resource/helpers/buildPreviewEmbed');
+const GetClient = require('../../../../main');
+const ratingModeration = require('../../../../moderation/ratingModeration');
 
 const rateResource = async (interaction, resourceData, guild) => {
     let resource;
@@ -206,6 +208,7 @@ const submit = (messages, interaction, resource, numRating, stringRating) => {
         }
     }
 
+    let submittedRating
     if(typeof prevRating == 'undefined') {
         newRating = {
             user_id: interaction.user.id,
@@ -215,8 +218,8 @@ const submit = (messages, interaction, resource, numRating, stringRating) => {
             stringRating: stringRating,
             prevReviews: []
         }
-
-        resource.ratings.push(newRating)
+        submittedRating = newRating
+        resource.ratings.push(submittedRating)
     } else {
         let prvReview = {
             numRating: prevRating.numRating,
@@ -236,7 +239,8 @@ const submit = (messages, interaction, resource, numRating, stringRating) => {
 
         prevRating.avgRating = totalRating/(i + 1)
 
-        resource.ratings.push(prevRating)
+        submittedRating = prevRating
+        resource.ratings.push(submittedRating)
     }
 
     let i = 0
@@ -271,6 +275,8 @@ const submit = (messages, interaction, resource, numRating, stringRating) => {
         }, 2500)
 
     })
+
+    ratingModeration(interaction, submittedRating, resource)
 }
 
 const makeButtons = (highligted) => {

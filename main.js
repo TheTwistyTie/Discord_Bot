@@ -12,6 +12,7 @@ const setPermissions = require('./setPermissions')
 const Database = require('./config/Database');
 const adminCommands = require('./textCommands/commandHandler')
 const eventHandler = require('./buttons/eventHandler')
+const moderationEvents = require('./moderation/moderationEvents')
 const db = new Database();
 db.connect();
 
@@ -73,6 +74,7 @@ const prefix = '!'
 
 client.on('messageCreate', async (message) => {
     if(message.author.bot) return;
+    if(message.channel.type == 'DM') return;
 
     bannedWords(message, client)
 
@@ -96,7 +98,14 @@ client.on('interactionCreate', (interaction) => {
         }
     } else if (interaction.isButton()) {
         eventHandler(interaction)
+        moderationEvents(interaction)
     }
 })
 
 client.login(process.env.TOKEN);
+
+const GetClient = () => {
+    return client
+}
+
+module.exports = GetClient
